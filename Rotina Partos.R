@@ -53,3 +53,4 @@ new.df5$'Faltam (%)' = round(((new.df5$ISE*100)/new.df5$mean.geom)-100,2)
 
 new.df5$espec = ifelse(is.na(new.df5$espec), "Não Outlier", "Outlier")
 
+
