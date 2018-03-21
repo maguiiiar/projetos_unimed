@@ -1,5 +1,6 @@
 require(data.table)
 require(base)
+
 i=1
 dados1 <- fread("Axis2014_4.tab", sep = "\t", h = TRUE, na.strings = "")
 assign(oname,  fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = ""))
@@ -8,9 +9,10 @@ ano = 2016
 trimestres = 4
 
  i=1
- for(i in 1:trimestres){
- sprintf("dados.%d.%d", ano, i) = fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
- a = if(i < 2) sprintf("dados.%d.%d", ano, i) else 
+ (i <= trimestres){
+   = fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
+ 
+ i = i+1
  }
  
  assign(sprintf("dados.%d", ano), sprintf("dados.%d", ano),  sep = "\t", h = TRUE, na.strings = ""))
@@ -18,6 +20,8 @@ trimestres = 4
 
 dados.2015 = bind_rows(dados.2015.1, dados.2015.2, dados.2015.3)
  
+
+
 
 
 
@@ -39,3 +43,15 @@ colnames(dados2)
 colnames(dados3)
 colnames(dados4)
 colnames(dados5)
+
+ano = 2016
+trimestres = 4
+
+dados.full = NULL
+dados <- list()
+for (i in 1:trimestres){
+  dados[[i]] <- fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
+  dados.full = rbindlist(dados.full, dados)
+}
+
+sprintf("dados.%d",ano) <- rbindlist(dados)
