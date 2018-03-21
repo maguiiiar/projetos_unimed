@@ -2,21 +2,24 @@ require(data.table)
 require(base)
 i=1
 dados1 <- fread("Axis2014_4.tab", sep = "\t", h = TRUE, na.strings = "")
+assign(oname,  fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = ""))
 
 ano = 2016
 trimestres = 4
 
  i=1
  for(i in 1:trimestres){
- oname = sprintf("dados.%d.%d", ano, i)
- assign(oname,  fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = ""))
+ sprintf("dados.%d.%d", ano, i) = fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
+ a = if(i < 2) sprintf("dados.%d.%d", ano, i) else 
  }
+ 
+ assign(sprintf("dados.%d", ano), sprintf("dados.%d", ano),  sep = "\t", h = TRUE, na.strings = ""))
 
 
+dados.2015 = bind_rows(dados.2015.1, dados.2015.2, dados.2015.3)
+ 
 
- 
- 
- 
+
 
 dados2 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201706.txt", sep = "|", h = TRUE, na.strings = "")
 dados3 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201707.txt", sep = "|", h = TRUE, na.strings = "")
