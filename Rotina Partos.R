@@ -1,56 +1,62 @@
-require(dplyr)
-require(reshape2)
-require(ggplot2)
-require(broom)
-require(psych)
+install.packages("car")
+install.packages("tseries")
+install.packages("astsa") 
+install.packages("forecast")
+install.packages("lattice")
+install.packages("lmtest")
+install.packages("randtests")
 
-dados.ise <- read.csv("ISE.csv", h=T, sep=";")
+require(car)
+require(tseries)
+require(astsa)
+require(forecast)
+require(forecast)
+require(lattice)
+require(lmtest)
+require(randtests)
 
-#boxplot
-a = qplot(Especialidade,ISE,data = dados.ise, geom = "boxplot") +
-  coord_flip()
+dados <- read.csv("Partos.csv", header = TRUE, sep = ";")
 
-ggplot(dados.ise, aes(x=ISE)) + geom_histogram(binwidth = 0.5)
+dados <- ts(dados)
+dados <- dados[,-1]
+dados$Total <- 0
+dados$Total <- dados$Cesariana + dados$Normal
 
-box<- dados.ise %>% group_by(Especialidade) %>% do(tidy(boxplot(.$ISE)))
-box
+total <- dados$Total
+stotal <- ts(total)
+stotal=ts(stotal,frequency=12,start=c(2015, 1))
+stotal
 
-#detecting outliers
-dados.ise$Especialidade = as.factor(dados.ise$Especialidade)
-outliers = boxplot(ISE ~ Especialidade, data=dados.ise)
-outliers$out
+cox.stuart.test(stotal)
 
-DF <- data.frame(ISE = outliers$out, espec = outliers$group)
+acf(diff(stotal))
+pacf(diff(stotal))
 
-#shapiro without silence - testing normality
-#shapiro <- dados.ise %>% group_by(Especialidade) %>% do(tidy(shapiro.test(.$ISE)))
-shapiro <- dados.ise %>% group_by(Especialidade) %>% do(tidy(my.shapiro(.$ISE), count(.$Especialidade)))
+#TESTE SAZONALIDADE#
 
-my.shapiro <- function(...) {
-  obj<-try(shapiro.test(...), silent=TRUE)
-  if (is(obj, "try-error")) return(NA) else return(obj)
-}
+sazo= stotal[1:36]
+sazo
+fried = matrix((sazo),nrow=6,ncol=6,byrow=TRUE,dimnames=NULL)
+friedman.test(fried)
 
-shapiro$p.value = round(shapiro$p.value, 4)
+#ESTIMANDO MODELO SARIMA
+modelo = (arima(ts(dados$Cesariana[1:34]), order = c(3,0,2), seasonal = list(order = c(2,1,1)))) 
+modelo
 
-count = dados.ise %>% group_by(Especialidade) %>% summarise(n = n())
-final = left_join(shapiro, count)
+plot(as.numeric(modelo$residuals))
+shapiro.test(as.numeric(modelo$residuals))
 
-names = data.frame(Especialidade = outliers$names, espec = 1:42)
-new.df = left_join(DF, names)
-new.df2 = left_join(dados.ise, new.df)
+previsao = forecast(modelo,h=6)
+previsao
+plot(previsao,lwd=3,xlab="Meses",ylab="Partos Cesárias",col="gray")
 
-new.df3 = dados.ise %>% group_by(Especialidade) %>% summarise(mean=geometric.mean(ISE+1))
-new.df3$mean = new.df3$mean-1
+#####
 
-no.outliers = new.df2[is.na(new.df2$espec),]
-new.df4 = no.outliers %>% group_by(Especialidade) %>% summarise(mean.geom = geometric.mean(ISE+1)-1, mean.arit = mean(ISE), pct50 = quantile(ISE, .50), pct60 = quantile(ISE, .60), pct70 = quantile(ISE, .70), pct80 = quantile(ISE, .80), pct90 = quantile(ISE, .90))  
+coeftest(modelo)
 
-new.df5 = left_join(new.df2, new.df4)
-new.df5$Meta = NA
-new.df5$Meta = ifelse(new.df5$ISE <= new.df5$mean.geom, "Atingiu Meta", "Não Atingiu Meta") 
-new.df5$'Faltam (%)' = round(((new.df5$ISE*100)/new.df5$mean.geom)-100,2)
+#####
 
-new.df5$espec = ifelse(is.na(new.df5$espec), "Não Outlier", "Outlier")
+predict(modelo, dados$Cesariana[35:37])
 
-
+??healthcareai
+install.packages('healthcareai')
