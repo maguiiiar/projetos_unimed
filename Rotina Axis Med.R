@@ -19,21 +19,17 @@ trimestres = 4
 
 
 dados.2015 = bind_rows(dados.2015.1, dados.2015.2, dados.2015.3)
- 
 
-
-
-
-
-dados2 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201706.txt", sep = "|", h = TRUE, na.strings = "")
-dados3 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201707.txt", sep = "|", h = TRUE, na.strings = "")
-dados4 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201708.txt", sep = "|", h = TRUE, na.strings = "")
-dados5 <- fread("Layout da base de Contas M?dicas (HRP) Colab 201709.txt", sep = "|", h = TRUE, na.strings = "")
-dados6 <- fread("Layout da base de Contas M?dicas (HRP) 201705.txt", sep = "|", h = TRUE, na.strings = "")
-dados7 <- fread("Layout da base de Contas M?dicas (HRP) 201706.txt", sep = "|", h = TRUE, na.strings = "")
-dados8 <- fread("Layout da base de Contas M?dicas (HRP) 201707.txt", sep = "|", h = TRUE, na.strings = "")
-dados9 <- fread("Layout da base de Contas M?dicas (HRP) 201708.txt", sep = "|", h = TRUE, na.strings = "")
-dados10 <- fread("Layout da base de Contas M?dicas (HRP) 201709.txt", sep = "|", h = TRUE, na.strings = "")
+dados1 <- fread("Axis2017_1.tab", sep = "\t", h = TRUE, na.strings = "")
+dados2 <- fread("Axis2017_2.tab", sep = "\t", h = TRUE, na.strings = "")
+dados3 <- fread("Axis2017_3.tab", sep = "\t", h = TRUE, na.strings = "")
+dados4 <- fread("Axis2017_4.tab", sep = "\t", h = TRUE, na.strings = "")
+dados5 <- fread("Axis2016_1.tab", sep = "\t", h = TRUE, na.strings = "")
+dados6 <- fread("Axis2016_2.tab", sep = "\t", h = TRUE, na.strings = "")
+dados7 <- fread("Axis2016_3.tab", sep = "\t", h = TRUE, na.strings = "")
+dados8 <- fread("Axis2016_4.tab", sep = "\t", h = TRUE, na.strings = "")
+dados9 <- fread("Axis2015_1.tab", sep = "\t", h = TRUE, na.strings = "")
+dados10 <- fread("Axis2015_2.tab", sep = "\t", h = TRUE, na.strings = "")
 
 dados <- rbind(dados1, dados2)
 dados <- rbind(dados, dados3)
