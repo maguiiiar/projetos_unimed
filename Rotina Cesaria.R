@@ -7,6 +7,7 @@ require(lattice)
 require(randtests)
 require(ggplot2)
 require(psych)
+require(trend)
 
 dados<-read.table("CESONLY.txt", header=T)
 dados = ts(dados,frequency=12,start=c(2015, 1))
@@ -14,6 +15,7 @@ dados
 attach(dados)
 
 cox.stuart.test(dados)
+cs.test(dados)
 
 dec <- decompose(dados)
 plot(dec)
