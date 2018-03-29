@@ -1,15 +1,6 @@
-install.packages("car")
-install.packages("tseries")
-install.packages("astsa") 
-install.packages("forecast")
-install.packages("lattice")
-install.packages("lmtest")
-install.packages("randtests")
-
 require(car)
 require(tseries)
 require(astsa)
-require(forecast)
 require(forecast)
 require(lattice)
 require(lmtest)
@@ -17,46 +8,80 @@ require(randtests)
 
 dados <- read.csv("Partos.csv", header = TRUE, sep = ";")
 
-dados <- ts(dados)
-dados <- dados[,-1]
-dados$Total <- 0
+################
+#SÉRIE TEMPORAL#
+################
+
 dados$Total <- dados$Cesariana + dados$Normal
 
-total <- dados$Total
-stotal <- ts(total)
-stotal=ts(stotal,frequency=12,start=c(2015, 1))
+stotal=ts(dados$Total,frequency=12,start=c(2015, 1))
 stotal
 
-cox.stuart.test(stotal)
+plot(stotal)
 
-acf(diff(stotal))
-pacf(diff(stotal))
+#teste de estacionariedade
 
-#TESTE SAZONALIDADE#
+adf.test(stotal) #estacionaridade para série original. H0: não estacionaridade.
+adf.test(diff(stotal)) #estacionaridade para 1ª diferença. H0: não estacionaridade.
+adf.test(diff(diff(stotal))) #estacionaridade para 2ª diferença. H0: não estacionaridade.
 
-sazo= stotal[1:36]
+#teste de tendência
+
+cox.stuart.test(stotal) #tendência para série original. H0: não há tendência.
+cox.stuart.test(diff(stotal)) #tendência para série original. H0: não há tendência.
+
+#teste de sazonalidade
+
+sazo= stotal[1:36] #matriz deve ser completa row x column
 sazo
 fried = matrix((sazo),nrow=6,ncol=6,byrow=TRUE,dimnames=NULL)
-friedman.test(fried)
+friedman.test(fried) #sazonalidade para a série original. H0: não existe sazonalidade determinística.
 
-#ESTIMANDO MODELO SARIMA
-modelo = (arima(ts(dados$Cesariana[1:34]), order = c(3,0,2), seasonal = list(order = c(2,1,1)))) 
+#correlogramas
+
+par(mfrow=c(2,1))
+
+acf(stotal)
+pacf(stotal)
+
+acf(diff(stotal)) #1ª diferença
+pacf(diff(stotal)) #1ª diferença
+
+acf(diff(stotal, lag=12)) #1ª diferença sazonal com lag 12
+pacf(diff(stotal,lag=12)) #1ª diferença sazonal com lag 12
+
+acf(diff(diff(stotal))) #2ª diferença 
+pacf(diff(diff(stotal))) #2ª diferença
+
+acf(diff(diff(stotal, lag=12))) #2ª diferença sazonal com lag 12
+pacf(diff(diff(stotal, lag=12))) #2ª diferença sazonal com lag 12
+
+plot(decompose(stotal)) #decomposição da série
+
+#estimação de modelo
+
+modelo = arima(ts(dados$Total), order = c(1,1,0), seasonal = list(order = c(2,0,1)))
 modelo
+
+#resíduos
 
 plot(as.numeric(modelo$residuals))
 shapiro.test(as.numeric(modelo$residuals))
 
+#previsão
+
 previsao = forecast(modelo,h=6)
 previsao
-plot(previsao,lwd=3,xlab="Meses",ylab="Partos Cesárias",col="gray")
+plot(previsao,lwd=3,xlab="Meses",ylab="Partos",col="gray")
 
-#####
+#significância de parãmetros
 
 coeftest(modelo)
 
-#####
+#######################
+#CONTROLE DE QUALIDADE#
+#######################
 
-predict(modelo, dados$Cesariana[35:37])
+require(qcc)
 
-??healthcareai
-install.packages('healthcareai')
+x = qcc(dados$Total, type = "xbar.one", confidence.level = 0.9, newdata = c(previsao$mean))
