@@ -6,6 +6,7 @@ require(lmtest)
 require(lattice)
 require(randtests)
 require(ggplot2)
+require(psych)
 
 dados<-read.table("CESONLY.txt", header=T)
 dados = ts(dados,frequency=12,start=c(2015, 1))
@@ -41,6 +42,8 @@ acf(diff(dados), lag.max=108)
 
 pacf(diff(dados))
 
+par(mfrow=c(2,1)) 
+
 acf(diff(diff(dados, lag = 12), lag.max=108))
 
 pacf(diff(diff(dados, lag = 12)))
@@ -55,15 +58,17 @@ friedman.test(fried)
 
 
 
-adf.test(diff(dados))
+adf.test(diff(diff(dados)))
 
 
 ##Estimando Modelo SARIMA
 
 
-modelodados = (arima(ts(dados[1:34]), order = c(3,0,2), seasonal = list(order= c(2,1,1)))) # estimando modelo arima
+modelodados = (arima(ts(dados), order = c(3,1,0), seasonal = list(order= c(2,0,1))))
 
 modelodados
+
+coeftest(modelodados)
 
 plot(as.numeric(modelodados$residuals))
 
@@ -81,13 +86,37 @@ Box.test(modelodados$residuals,lag=8,type='Box-Pierce') ## P GRANDE FICA COM ELE
 
 shapiro.test(as.numeric(modelodados$residuals))
 
-## Previs?o para 12 meses
+## Previsão para 12 meses
 
 
-previsao = forecast(modelodados,h=3)
+previsao = forecast(modelodados,h=3,level = 0.90)
 previsao
 plot(previsao,lwd = 2,col= "gray", xlab="Meses",ylab="Dados")
 par(adj = 0)
-autoplot(previsao, main="Previs?o de Partos Cesarianas 17/18", xlab="Meses",ylab="Qtd. Ces?rias",flwd = 1.1) + expand_limits(x=c(0,40), y=c(0, 830)) + scale_x_continuous("Meses", breaks = c(0,5,10,15,20,25,30,35,40)) + scale_y_continuous("Qtd. Ces?rias", breaks = c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850))
+autoplot(previsao, main="Previsão de Partos Cesarianas 17/18", xlab="Meses",ylab="Qtd. Cesárias",flwd = 1.1) + expand_limits(x=c(0,40), y=c(100,400)) + scale_x_continuous("Meses", breaks = c(0,5,10,15,20,25,30,35,40)) + scale_y_continuous("Qtd. Cesárias", breaks = c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850))
 
-coeftest(modelodados)
+
+
+objeto <- predict(modelodados, n.ahead = 3)
+ts.plot(ts(dados[1:34]), objeto$pred[1:3])
+length(objeto$pred)
+
+##limites de controle
+
+require(qcc)
+require(dplyr)
+require(broom)
+
+plot.xbarra = qcc(dados[12:38,], type="xbar.one", newdata = c(previsao$mean), confidence.level = 0.90)
+
+summary(plot.xbarra)
+
+dataframe = as.data.frame(summary(plot.xbarra))
+
+
+shapiro.test(dados)
+
+print(dados)
+
+geometric.mean(dados)
+mean(dados)
