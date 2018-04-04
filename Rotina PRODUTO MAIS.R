@@ -7,7 +7,7 @@ require(data.table)
 require(openxlsx)
 require(bit64)
 
-## RODANDO BASE TXT
+## RODANDO BASE TXT  
 
 #detalhadoMAIS1 <- fread("mais0104.txt", h=T, sep="\t", na.strings="NA")
 
