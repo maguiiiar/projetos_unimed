@@ -160,7 +160,7 @@ basegeral201702 <- fread("BaseCusto201702.txt", h=T, sep="|",fill=T, na.string="
 basegeral201703 <- fread("BaseCusto201703.txt", h=T, sep="|",fill=T, na.string="NA")
 basegeral201704 <- fread("BaseCusto201704.txt", h=T, sep="|",fill=T, na.string="NA")
 
-basegeral <- bind_rows(basegeral201401,basegeral201402,
+basegeraltot <- bind_rows(basegeral201401,basegeral201402,
                    basegeral201403,basegeral201404,
                    basegeral201405,basegeral201406,
                    basegeral201407,basegeral201408,
