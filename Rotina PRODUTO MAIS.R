@@ -22,7 +22,6 @@ require(bit64)
 ## RODANDO BASE DEPOIS DA ALTERAÇÃO
 
 detalhadoMAIS1 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 2, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
-
 detalhadoMAIS2 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 3, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
 
 names(detalhadoMAIS1)
@@ -118,6 +117,8 @@ colnames(detalhadoMAIS1) <- c("Competência","Data.Solicitação",
                               "Exames.-.Todos")
 
 detalhadoUNIF = rbind(detalhadoMAIS1,detalhadoMAIS2)
+
+#BASES GERAIS - ORNELAS
 
 basegeral201401 <- fread("BaseCusto201401.txt", h=T, sep="|",fill=T, na.string="NA")
 basegeral201402 <- fread("BaseCusto201402.txt", h=T, sep="|",fill=T, na.string="NA")
