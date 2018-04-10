@@ -85,3 +85,29 @@ coeftest(modelo)
 require(qcc)
 
 x = qcc(dados$Total, type = "xbar.one", confidence.level = 0.9, newdata = c(previsao$mean))
+
+data1 = data.frame(Partos = x$statistics, Tipo = "Dado original")
+data2 = data.frame(Partos = x$newstats)
+data = rbind(data1, data2)
+
+write.csv = ( a = rbind(data1, data2))
+
+a = auto.arima(dados$Total, trace = TRUE, allowmean = FALSE, ic = "aic", stepwise = TRUE, d = 1, D = 1)
+a
+
+previsao = forecast(a,h=6)
+previsao
+plot(previsao,lwd=3,xlab="Meses",ylab="Partos",col="gray")
+
+plot(as.numeric(a$residuals))
+shapiro.test(as.numeric(a$residuals))
+coeftest(a)
+
+accuracy(a)
+
+
+require(caret)
+
+a = createTimeSlices(dados$Total)
+a$train
+a$test
