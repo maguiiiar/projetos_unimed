@@ -30,6 +30,39 @@ detalhadoMAIS2 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sh
 names(detalhadoMAIS1)
 names(detalhadoMAIS2)
 
+
+detalhadoMAIS1 %>% select(-CodBeneficiario, 
+                          -Tipo.Beneficiário, 
+                          -IdEvento ,
+                          -IdItemEvento, 
+                          -CodEvento ,
+                          -Nº.Guia.Prestador, 
+                          -Hora.Abertura,
+                          -Id.Beneficiario,
+                          -IdContrato,
+                          -Nome.Contrato,
+                          -Tipo.Empresa,
+                          -Tipo.Empresa.Detalhado ,
+                          -Nome.Prestador.Exec.,
+                          -CID,
+                          -Classe.Tratamento,
+                          -ClasseServico,
+                          -Classe.Prestador ,
+                          -SubClasseServico,
+                          -EspecialidadeServico,
+                          -Composição.Serviço,
+                          -Local.Execução.Cardio,
+                          -`Local.Execução.Cardio.(Evento.Cobr.)`,
+                          -Local.Execução.Triare,
+                          -Local.Execução.Oficial,
+                          -Tipo.Rede,
+                          -`Gerou.Doc..Financeiro?`, 
+                          -Grupo.Prestador, 
+                          -Cód..Prestador.Solic. ,
+                          -Nome.Prestador.Solic. ,
+                          -Especialidade.Prestador.Solic., 
+                          -SubClasseServico)
+
 detalhadoMAIS1$CodBeneficiario <- NULL
 detalhadoMAIS1$Tipo.Beneficiário <- NULL
 detalhadoMAIS1$IdEvento <- NULL
