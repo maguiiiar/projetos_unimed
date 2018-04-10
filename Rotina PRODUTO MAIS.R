@@ -10,112 +10,74 @@ require(bit64)
 ## RODANDO BASE TXT
 
 #detalhadoMAIS1 <- fread("mais0104.txt", h=T, sep="\t", na.strings="NA")
-
 #detalhadoMAIS2 <- fread("mais0512.txt", h=T, sep="\t",fill=T, na.string="NA")
 
 ## RODANDO BASE ANTES DE ALTERAÇÃO
-
 #detalhadoMAIS1 <- read.xlsx("Detalhado Produto Mais.xlsx", sheet = 2, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
-
 #detalhadoMAIS2 <- read.xlsx("Detalhado Produto Mais.xlsx", sheet = 3, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
 
 ## RODANDO BASE DEPOIS DA ALTERAÇÃO
-
 detalhadoMAIS1 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 2, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
 detalhadoMAIS2 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 3, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
 
 names(detalhadoMAIS1)
 names(detalhadoMAIS2)
 
+detalhadoMAIS1 <- detalhadoMAIS1 %>% select(-CodBeneficiario,-Tipo.Beneficiário, 
+                                            -IdEvento,-IdItemEvento,-CodEvento,
+                                            -Nº.Guia.Prestador,-Hora.Abertura,
+                                            -Id.Beneficiario,-IdContrato,
+                                            -Nome.Contrato,-Tipo.Empresa,
+                                            -Tipo.Empresa.Detalhado,
+                                            -Nome.Prestador.Exec.,-CID,-Classe.Tratamento,
+                                            -ClasseServico,-Classe.Prestador,-SubClasseServico,
+                                            -EspecialidadeServico,-Composição.Serviço,
+                                            -Local.Execução.Cardio,
+                                            -`Local.Execução.Cardio.(Evento.Cobr.)`,
+                                            -Local.Execução.Triare,-Local.Execução.Oficial,
+                                            -Tipo.Rede,-`Gerou.Doc..Financeiro?`, 
+                                            -Grupo.Prestador,-Cód..Prestador.Solic.,
+                                            -Nome.Prestador.Solic.,-Especialidade.Prestador.Solic., 
+                                            -SubClasseServico)
 
 
-detalhadoMAIS1 %>% select(-CodBeneficiario,-Tipo.Beneficiário, 
-                          -IdEvento,-IdItemEvento,-CodEvento,
-                          -Nº.Guia.Prestador,-Hora.Abertura,
-                          -Id.Beneficiario,-IdContrato,
-                          -Nome.Contrato,-Tipo.Empresa,
-                          -Tipo.Empresa.Detalhado,
-                          -Nome.Prestador.Exec.,-CID,-Classe.Tratamento,
-                          -ClasseServico,-Classe.Prestador,-SubClasseServico,
-                          -EspecialidadeServico,-Composição.Serviço,
-                          -Local.Execução.Cardio,
-                          -`Local.Execução.Cardio.(Evento.Cobr.)`,
-                          -Local.Execução.Triare,-Local.Execução.Oficial,
-                          -Tipo.Rede,-`Gerou.Doc..Financeiro?`, 
-                          -Grupo.Prestador,-Cód..Prestador.Solic.,
-                          -Nome.Prestador.Solic.,-Especialidade.Prestador.Solic., 
-                          -SubClasseServico)
-
-detalhadoMAIS1$CodBeneficiario <- NULL
-detalhadoMAIS1$Tipo.Beneficiário <- NULL
-detalhadoMAIS1$IdEvento <- NULL
-detalhadoMAIS1$IdItemEvento <- NULL
-detalhadoMAIS1$CodEvento <- NULL
-detalhadoMAIS1$Nº.Guia.Prestador <- NULL
-detalhadoMAIS1$Hora.Abertura<- NULL
-detalhadoMAIS1$Id.Beneficiario<- NULL
-detalhadoMAIS1$IdContrato<- NULL
-detalhadoMAIS1$Nome.Contrato<- NULL
-detalhadoMAIS1$Tipo.Empresa<- NULL
-detalhadoMAIS1$Tipo.Empresa.Detalhado <- NULL
-detalhadoMAIS1$Nome.Prestador.Exec.<- NULL
-detalhadoMAIS1$CID<- NULL
-detalhadoMAIS1$Classe.Tratamento<- NULL
-detalhadoMAIS1$ClasseServico<- NULL
-detalhadoMAIS1$Classe.Prestador <- NULL
-detalhadoMAIS1$SubClasseServico<- NULL
-detalhadoMAIS1$EspecialidadeServico<- NULL
-detalhadoMAIS1$Composição.Serviço<- NULL
-detalhadoMAIS1$Local.Execução.Cardio<- NULL
-detalhadoMAIS1$`Local.Execução.Cardio.(Evento.Cobr.)`<- NULL
-detalhadoMAIS1$Local.Execução.Triare<- NULL
-detalhadoMAIS1$Local.Execução.Oficial<- NULL
-detalhadoMAIS1$Tipo.Rede<- NULL
-detalhadoMAIS1$`Gerou.Doc..Financeiro?` <- NULL
-detalhadoMAIS1$Grupo.Prestador <- NULL
-detalhadoMAIS1$Cód..Prestador.Solic. <- NULL
-detalhadoMAIS1$Nome.Prestador.Solic. <- NULL
-detalhadoMAIS1$Especialidade.Prestador.Solic. <- NULL
-detalhadoMAIS1$SubClasseServico <- NULL
-
-detalhadoMAIS2$Nº.Cartão.Beneficiário <- NULL
-detalhadoMAIS2$Tipo.Beneficiário <- NULL
-detalhadoMAIS2$Guia.Numero <- NULL
-detalhadoMAIS2$Procedimento.Codigo <- NULL
-detalhadoMAIS2$Tipo.Empresa <- NULL
-detalhadoMAIS2$Nº.Guia.Principal <- NULL
-detalhadoMAIS2$Nº.Guia.Prestador <- NULL
-detalhadoMAIS2$`N°.Senha.Autorização` <- NULL
-detalhadoMAIS2$Nº.Lote <- NULL
-detalhadoMAIS2$Cód..Origem.Lote <- NULL
-detalhadoMAIS2$Nome.Origem <- NULL
-detalhadoMAIS2$Hora.Solicitação <- NULL
-detalhadoMAIS2$Hora.Inicio.Realização <- NULL
-detalhadoMAIS2$Nome.Classe.Guia <- NULL
-detalhadoMAIS2$Classe.Procedimento <- NULL
-detalhadoMAIS2$SubClasse.Procedimento <- NULL
-detalhadoMAIS2$Nome.Contrato <- NULL
-detalhadoMAIS2$Classe.Credenciado <- NULL
-detalhadoMAIS2$Nome.Prestador.Executante <- NULL
-detalhadoMAIS2$Nome.Especialidade.Solicitante <- NULL
-detalhadoMAIS2$Tipo.Despesa <- NULL
-detalhadoMAIS2$Grupo.Custo.Assistencial <- NULL
-detalhadoMAIS2$Nome.Custo.Assistencial <- NULL
-detalhadoMAIS2$Cód..CID <- NULL
-detalhadoMAIS2$Nome.CID <- NULL
-detalhadoMAIS2$Valor.Cobrança <- NULL
-detalhadoMAIS2$Data.Recebimento <- NULL
-detalhadoMAIS2$Data.Emissão <- NULL
-detalhadoMAIS2$Data.Realização <- NULL
-detalhadoMAIS2$Especialidade.Procedimento <- NULL
-detalhadoMAIS2$Grupo.Contrato <- NULL
-detalhadoMAIS2$Classe.Contrato <- NULL
-detalhadoMAIS2$Cód..Credenciado <- NULL
-detalhadoMAIS2$Nome.Credenciado <- NULL
-detalhadoMAIS2$Cód..Prestador.Solicitante <- NULL
-detalhadoMAIS2$Nome.Prestador.Solicitante <- NULL
-detalhadoMAIS2$Nome.Especialidade.Credenciado <- NULL
-
+detalhadoMAIS1 <- detalhadoMAIS1 %>% select(-Nº.Cartão.Beneficiário, 
+                                            -Tipo.Beneficiário,
+                                            -Guia.Numero, 
+                                            -Procedimento.Codigo, 
+                                            -Tipo.Empresa, 
+                                            -Nº.Guia.Principal, 
+                                            -Nº.Guia.Prestador, 
+                                            -`N°.Senha.Autorização`, 
+                                            -Nº.Lote, 
+                                            -Cód..Origem.Lote, 
+                                            -Nome.Origem, 
+                                            -Hora.Solicitação, 
+                                            -Hora.Inicio.Realização, 
+                                            -Nome.Classe.Guia, 
+                                            -Classe.Procedimento, 
+                                            -SubClasse.Procedimento, 
+                                            -Nome.Contrato, 
+                                            -Classe.Credenciado, 
+                                            -Nome.Prestador.Executante, 
+                                            -Nome.Especialidade.Solicitante, 
+                                            -Tipo.Despesa, 
+                                            -Grupo.Custo.Assistencial, 
+                                            -Nome.Custo.Assistencial, 
+                                            -Cód..CID,
+                                            -Nome.CID,
+                                            -Valor.Cobrança, 
+                                            -Data.Recebimento, 
+                                            -Data.Emissão,
+                                            -Data.Realização, 
+                                            -Especialidade.Procedimento, 
+                                            -Grupo.Contrato, 
+                                            -Classe.Contrato, 
+                                            -Cód..Credenciado, 
+                                            -Nome.Credenciado,
+                                            -Cód..Prestador.Solicitante, 
+                                            -Nome.Prestador.Solicitante, 
+                                            -Nome.Especialidade.Credenciado)
 
 names(detalhadoMAIS1)
 names(detalhadoMAIS2)
