@@ -27,7 +27,8 @@ trimestres = 4
 
 dados.2015 = bind_rows(dados.2015.1, dados.2015.2, dados.2015.3)
 
-dados1 <- fread("Axis2017_1.tab", sep = "\t", h = TRUE, na.strings = "")
+dados <- fread("Axis2018_1.tab", sep = "\t", h = TRUE, na.strings = c("", "NA"))
+dados1 <- fread("Axis2017_1.tab", sep = "\t", h = TRUE, na.strings = c("", "NA"))
 dados2 <- fread("Axis2017_2.tab", sep = "\t", h = TRUE, na.strings = "")
 dados3 <- fread("Axis2017_3.tab", sep = "\t", h = TRUE, na.strings = "")
 dados4 <- fread("Axis2017_4.tab", sep = "\t", h = TRUE, na.strings = "")
@@ -35,7 +36,7 @@ dados5 <- fread("Axis2016_1.tab", sep = "\t", h = TRUE, na.strings = "")
 dados6 <- fread("Axis2016_2.tab", sep = "\t", h = TRUE, na.strings = "")
 dados7 <- fread("Axis2016_3.tab", sep = "\t", h = TRUE, na.strings = "")
 dados8 <- fread("Axis2016_4.tab", sep = "\t", h = TRUE, na.strings = "")
-dados9 <- fread("Axis2015_1.tab", sep = "\t", h = TRUE, na.strings = "")
+dados9 <- fread("Axis2015_1.tab", sep = "\t", h = TRUE, na.strings = c("","NA"))
 dados10 <- fread("Axis2015_2.tab", sep = "\t", h = TRUE, na.strings = "")
 
 dados <- rbind(dados1, dados2)
@@ -59,6 +60,23 @@ for (i in 1:trimestres){
 
 sprintf("dados.%d",ano) <- rbindlist(dados)
 
+<<<<<<< HEAD
+dados9$`CODIGO DO CID` = as.factor(dados9$`CODIGO DO CID`)
+dados$`CODIGO DO CID` = as.factor(dados$`CODIGO DO CID`)
+table(dados$`CODIGO DO CID`)
+
+binded_rows = data.frame()
+binded_rows2 = data.frame()
+
+load.and.bind = function(qtd.bases) {
+                
+                bases = as.character(c(1:qtd.bases))
+                binded_rows = bind_rows(paste(bases, collapse = ", "))}
+
+data.loaded <- "Axis2014_4"
+require(data.table)
+my_data = fread("Partos.csv", sep = ";",)
+=======
 
 
 ##################### ROTINA NOVA!!!!! #################
@@ -178,6 +196,11 @@ gc()
 
 require(tidyr)
 
+<<<<<<< HEAD
+basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2)) 
+>>>>>>> f859b8c4bf907578d0fde0953bac233fab5270de
+=======
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2))
 
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D"), sep = 4)
+>>>>>>> 6cbd0b64c8dfb0d297e2ce4467caf15580429007
