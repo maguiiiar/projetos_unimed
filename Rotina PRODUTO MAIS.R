@@ -21,6 +21,8 @@ require(bit64)
 
 ## RODANDO BASE DEPOIS DA ALTERAÇÃO
 
+##BASE PRODUTO MAIS ##
+
 detalhadoMAIS1 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 2, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
 
 detalhadoMAIS2 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx", sheet = 3, startRow = 1, colNames = TRUE, na.strings ="NA",detectDates=TRUE)
@@ -118,6 +120,16 @@ colnames(detalhadoMAIS1) <- c("Competência","Data.Solicitação",
                               "Exames.-.Todos")
 
 detalhadoUNIF = rbind(detalhadoMAIS1,detalhadoMAIS2)
+names(detalhadoUNIF)
+
+agrupamento <- detalhadoUNIF %>% group_by(Faixa.Etária) %>%  
+              summarise(n=n(), nome.na = sum(is.na(Nome.Beneficiário)),
+              cpf.na = sum(CPF.Beneficiario==0),
+              porc = (sum(is.na(Nome.Beneficiário)))/(n()),CPFeNOME.falt = sum((CPF.Beneficiario==0) & (is.na(Nome.Beneficiário))), porcFALT2 = (sum((CPF.Beneficiario==0) & (is.na(Nome.Beneficiário))))/n(), idades = sum(is.na(Idade)) )
+
+detalhadoUNIF %>% summarise(id = paste(CPF.Beneficiario,Idade, collapse = "#"))
+
+## BASE TOTAL ##
 
 basegeral201401 <- fread("BaseCusto201401.txt", h=T, sep="|",fill=T, na.string="NA")
 basegeral201402 <- fread("BaseCusto201402.txt", h=T, sep="|",fill=T, na.string="NA")
