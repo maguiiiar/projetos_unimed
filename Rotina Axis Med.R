@@ -158,7 +158,49 @@ save(basefinal,file="basecompleta.RData")
 
 load("basecompleta.RData")
 
+basefinal$ID <- paste(year(basefinal$`DATA DE NASCIMENTO`),year(basefinal$`DATA DE ATENDIMENTO`), basefinal$`CODIGO DO PROCEDIMENTO`, collapse = " # ")
+class(as.Date(basefinal$`DATA DE ATENDIMENTO`)
+
+save(basefinal,file = "basetestes.RData")
+      
+basefinal$`DATA DE ATENDIMENTO` <- as.Date(basefinal$`DATA DE ATENDIMENTO`)
+basefinal$`DATA DE NASCIMENTO` <- as.Date(basefinal$`DATA DE NASCIMENTO`)
+
+require(lubridate)
+gc()
+
+
+#vetor <- basefinal %>% group_by(summarise(is.na(basefinal$CPFCusto))) %>% sum(basefinal$`VALOR PROCEDIMENTO`)
+
+#options(OutDec = ",")
+
+#require(stringr)
+
+#basefinal$`VALOR PROCEDIMENTO` <- as.numeric(basefinal$`VALOR PROCEDIMENTO`)
+#sum(is.na(basefinal$`VALOR PROCEDIMENTO`))
+
+#table(is.na(basefinal$CPFCusto), sum(as.numeric(basefinal$`VALOR PROCEDIMENTO`)))
+#class(basefinal$`VALOR PROCEDIMENTO`)
+
+#basefinal$`VALOR PROCEDIMENTO` <- as.factor(basefinal$`VALOR PROCEDIMENTO`)
+
+#fatores <- levels(basefinal$`VALOR PROCEDIMENTO`)
+#df <- as.data.frame(fatores)
+#df <- as.numeric(df$fatores)
+#df <- as.data.frame(df)
+#sum(is.na(basefinal$`VALOR PROCEDIMENTO`))
+
+#head(basefinal)
+
+#basefinal$ID = paste()
+
 require(tidyr)
 
+<<<<<<< HEAD
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2)) 
 >>>>>>> f859b8c4bf907578d0fde0953bac233fab5270de
+=======
+basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2))
+
+basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D"), sep = 4)
+>>>>>>> 6cbd0b64c8dfb0d297e2ce4467caf15580429007
