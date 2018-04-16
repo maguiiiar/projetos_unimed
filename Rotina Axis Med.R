@@ -17,12 +17,12 @@ trimestres = 4
 
  i=1
  (i <= trimestres){
-   = fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
+   fread(sprintf("Axis%d_%d.tab", ano, i),  sep = "\t", h = TRUE, na.strings = "")
  
  i = i+1
  }
  
- assign(sprintf("dados.%d", ano), sprintf("dados.%d", ano),  sep = "\t", h = TRUE, na.strings = ""))
+ assign(sprintf("dados.%d", ano), sprintf("dados.%d", ano),  sep = "\t", h = TRUE, na.strings = "")
 
 
 dados.2015 = bind_rows(dados.2015.1, dados.2015.2, dados.2015.3)
@@ -60,7 +60,7 @@ for (i in 1:trimestres){
 
 sprintf("dados.%d",ano) <- rbindlist(dados)
 
-<<<<<<< HEAD
+HEAD
 dados9$`CODIGO DO CID` = as.factor(dados9$`CODIGO DO CID`)
 dados$`CODIGO DO CID` = as.factor(dados$`CODIGO DO CID`)
 table(dados$`CODIGO DO CID`)
@@ -75,14 +75,16 @@ load.and.bind = function(qtd.bases) {
 
 data.loaded <- "Axis2014_4"
 require(data.table)
-my_data = fread("Partos.csv", sep = ";",)
-=======
+my_data = fread("Partos.csv", sep = ";")
+
 
 
 ##################### ROTINA NOVA!!!!! #################
+format(dados2$`VALOR PROCEDIMENTO`,decimal.mark=",")
 
 require(data.table)
 require(dplyr)
+dados1$`VALOR PROCEDIMENTO` <- as.numeric(as.character(dados1$`VALOR PROCEDIMENTO`))
 
 dados1 <- fread("Axis2017_1.tab", sep = "\t", h = TRUE, na.strings = c("","NA"))
 dados1$`CEP DO EXECUTANTE/PRESTADOR` <- NULL
@@ -113,7 +115,9 @@ dados13$`CEP DO EXECUTANTE/PRESTADOR` <- NULL
 
 rm(dados10,dados11,dados12,dados13)
 
-axis <- bind_rows(dados1,dados2)
+uniontest <- bind_rows(dados1,dados2,dados3,dados4)
+
+axis <- bind_rows(dados1,dados2,dados)
 rm(dados1,dados2)
 gc()
 axis2 <- bind_rows(axis, dados3)
@@ -159,7 +163,6 @@ save(basefinal,file="basecompleta.RData")
 load("basecompleta.RData")
 
 basefinal$ID <- paste(year(basefinal$`DATA DE NASCIMENTO`),year(basefinal$`DATA DE ATENDIMENTO`), basefinal$`CODIGO DO PROCEDIMENTO`, collapse = " # ")
-class(as.Date(basefinal$`DATA DE ATENDIMENTO`)
 
 save(basefinal,file = "basetestes.RData")
       
@@ -172,7 +175,7 @@ gc()
 
 #vetor <- basefinal %>% group_by(summarise(is.na(basefinal$CPFCusto))) %>% sum(basefinal$`VALOR PROCEDIMENTO`)
 
-#options(OutDec = ",")
+options(OutDec = ".")
 
 #require(stringr)
 
@@ -196,11 +199,32 @@ gc()
 
 require(tidyr)
 
-<<<<<<< HEAD
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2)) 
->>>>>>> f859b8c4bf907578d0fde0953bac233fab5270de
-=======
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D", "3D", "4D"), sep = c(2,2,2,2))
 
 basefinal %>% separate(`CODIGO DO PROCEDIMENTO`, into = c("1D", "2D"), sep = 4)
->>>>>>> 6cbd0b64c8dfb0d297e2ce4467caf15580429007
+
+
+names(uniontest)
+
+uniontest$trim <- ifelse(uniontest$CompPagamento == "2017/01"|uniontest$CompPagamento == "2017/02"|uniontest$CompPagamento == "2017/03" , 1, 
+                         ifelse(uniontest$CompPagamento == "2017/04"|uniontest$CompPagamento == "2017/05"|uniontest$CompPagamento == "2017/06", 2, 
+                                ifelse(uniontest$CompPagamento == "2017/07"|uniontest$CompPagamento == "2017/08"|uniontest$CompPagamento == "2017/09", 3, 
+                                       ifelse(uniontest$CompPagamento == "2017/10"|uniontest$CompPagamento == "2017/11"|uniontest$CompPagamento == "2017/12", 4, NA))))
+
+
+objetogeral <- uniontest %>% group_by(trim,ESPECIALIDADE) %>% summarise(n=n(), custotal=sum(`VALOR PROCEDIMENTO`))
+
+fator <- as.factor(uniontest$`VALOR PROCEDIMENTO`)
+levels(fator)
+fator <- as.numeric(uniontest$`VALOR PROCEDIMENTO`)
+
+class(uniontest$`VALOR PROCEDIMENTO`)
+
+min(basefinal$`DATA DE ATENDIMENTO`)
+
+basefinal$anomesatend = substr(basefinal$`DATA DE ATENDIMENTO`, 1,7)
+
+basefinal = basefinal %>% filter(substr(basefinal$`DATA DE ATENDIMENTO`, 1,4) == "2017")
+
+save(basefinal,file="base2017.RData")
