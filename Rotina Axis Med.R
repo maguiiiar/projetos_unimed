@@ -228,3 +228,4 @@ basefinal$anomesatend = substr(basefinal$`DATA DE ATENDIMENTO`, 1,7)
 basefinal = basefinal %>% filter(substr(basefinal$`DATA DE ATENDIMENTO`, 1,4) == "2017")
 
 save(basefinal,file="base2017.RData")
+load("base2017.RData")
