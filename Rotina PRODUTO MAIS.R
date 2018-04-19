@@ -39,6 +39,23 @@ detalhadoMAIS2 <- read.xlsx("Detalhado Produto  Mais - com cpf e guias.xlsx",
 # names(detalhadoMAIS1)
 # names(detalhadoMAIS2)
 
+### UNIR PROCEDIMENTOS ###
+
+proc.cias <- read.xlsx("servicoscias.xlsx", sheet = 1, startRow = 1,
+                       colNames = TRUE, na.strings = "NA")
+
+colnames(proc.cias)[1] <- "Cód..Procedimento"
+
+detalhadoUNIF <- left_join(detalhadoUNIF,proc.cias, by= "Cód..Procedimento")
+
+
+som.proc <- detalhadoUNIF %>% select(Cód..Procedimento,Nome.Procedimento,
+                                     Valor.Custo,Competência)
+
+objeto200 <- som.proc %>% group_by(Competência,Cód..Procedimento, 
+                                   Nome.Procedimento) %>% summarise(
+                                     valor.medio = mean(Valor.Custo))
+
 ### UNIR ESPECIALIDADES ###
 
 de.para <- read.xlsx("DE PARA ESPECIALIDADES.xlsx",sheet = 1, startRow = 1, 
@@ -174,9 +191,8 @@ objeto3 <- detalhadoUNIF %>% group_by(trim,Nome.Especialidade.Executante,
                                         custopbene=custotal/n.count.cpf)
 
 objeto4 <- detalhadoUNIF %>% group_by(Nome.Beneficiário, 
-                                      CPF.Beneficiario,Faixa.Etária,
-                                      Sexo,
-                                      Nome.Especialidade.Executante) %>% 
+                                      CPF.Beneficiario,Competência,
+                                      Faixa.Etária,Sexo) %>% 
             summarise(n=n(), custotal=sum(Valor.Custo), 
             custo.medio=custotal/n, 
             consulta.eletivas=sum(`Consultas.-.Eletivas`,na.rm = T),
