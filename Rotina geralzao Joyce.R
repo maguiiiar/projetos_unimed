@@ -251,7 +251,22 @@ dadosfinais <- bind_rows(dadosgerais3, dadosunion0118,dadosunion0218)
 gc()
 save(dadosfinais,file = "basegeralj05a02.RData")
 
+### INCLUINDO CBHPM NOS DADOS
+
+cbhpm.cod <- fread("CBHPM.csv", h=TRUE, sep = ";", na.strings = c("","NA"))
+
+dadosfinais$id <- substr(dadosfinais$`Procedimento Codigo`,1,5)
+
+cbhpm.cod$id = as.character(cbhpm.cod$id)
+
+unif = left_join(dadosfinais, cbhpm.cod, by="id")
 
 ### ANALISE DOS DADOS E FUNCOES ###
 
+names(dadosfinais)
+colnames(unif)[1] <- "Comp"
+levels(as.factor(dadosfinais$`Contrato GrupoEmpresa`))
 
+save(unif, file = "basegeralcomidunifj0512.RData")
+
+object <- unif %>% filter(`Contrato GrupoEmpresa`%in% c("COLABORADOR MAIS","REAL MOTO PECAS MAIS","UNIMED MAIS","ALGAR MAIS","FAEPU MAIS","UFU MAIS") & Guia.OrigemCodigo == 99 & `Executante Nome` %in% c("Cias Centro Integrado de Atencao A Saude Unimed Uberlandia","Erica Maria Ferreira de Oliveira","Kenia Pereira Vilela","Camila Cristina Santos Simamoto Lopes","Fernanda Batista de Melo Otoni")) %>% group_by(`Beneficiario Sexo`, Comp,`Beneficiario Faixa Etaria`,id,`Executante Nome`) %>% summarise(n=n_distinct(`Beneficiario Nome`),valor= sum(Guia.ProcedimentoVlrPagoAjustado))
