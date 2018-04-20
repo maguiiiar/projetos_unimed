@@ -11,6 +11,12 @@ base.med.clh = fread("Tabela Unimed Uberlândia de Medicamentos CLH - Versão 7.
 base.med.hosp = fread("Tabela Unimed Uberlândia de Medicamentos Hospitalar - Versão 10.7 - Vigência. 01.04.2018.csv", h=T, sep=";")
 base.med.onco = fread("Tabela Unimed Uberlandia de Medicamentos Oncológicos- Versão 4.13 - Vigência 01.04.2018.csv", h=T, sep=";")
 
+base.med.cias$`Valor Pagamento` <- as.numeric(base.med.cias$`Valor Pagamento`)
+base.med.clh$Valor <- as.numeric(base.med.clh$Valor)
+base.med.hosp$`Valor Pagamento` <- as.numeric(base.med.hosp$`Valor Pagamento`)
+base.med.onco$Valor <- as.numeric(base.med.onco$Valor)
+
+
 base.mat.cias = base.mat.cias %>% select(`Código - versão TISS 3.03.03`, `Nome Comercial`, `Descrição do Produto`, `Especialidade do Produto`, `Valor Pagamento`) %>%
                                   rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome Comercial`, descrição = `Descrição do Produto`, especialidade  = `Especialidade do Produto`, valor = `Valor Pagamento`) %>%
                                   mutate(Versão = "CIAS", Tipo = "Material")     
@@ -39,6 +45,21 @@ base.med.onco = base.med.onco %>% select(`Código - versão TISS 3.03.02`, `Nome
 
 base.mat = rbind(base.mat.cias, base.mat.clh, base.mat.hosp, base.mat.onco)
 base.med = rbind(base.med.cias, base.med.clh, base.med.hosp, base.med.onco)
-###
 
-base.mat.cias = base.mat.cias %>% 
+base.med$valor = as.numeric(base.med$valor)
+
+rm(base.mat.cias, base.mat.clh, base.mat.hosp, base.mat.onco, base.med.cias, base.med.clh, base.med.hosp, base.med.onco); gc(); gc()
+
+save(base.mat, file="base.materiais.RData")
+save(base.med, file="base.medicamentos.RData")
+
+list.files(pattern = "*.csv")
+
+#Reading all .csv files from the set directory and binding rows. All at once.
+library(dplyr)
+library(readr)
+
+list_file <- list.files(pattern = "*.csv") %>% 
+             lapply(fread, stringsAsFactors=F) %>% bind_rows
+
+
