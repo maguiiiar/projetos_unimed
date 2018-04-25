@@ -2,6 +2,7 @@ require(dplyr)
 require(psych)
 require(readxl)
 require(data.table)
+require(tidyr)
 
 ### BASE FINALIZADA ###
 
