@@ -3,6 +3,7 @@ require(psych)
 require(readxl)
 require(data.table)
 require(tidyr)
+require(openxlsx)
 
 ### BASE FINALIZADA ###
 
@@ -226,8 +227,9 @@ nome <- c("%Competencia","Guia.OrigemCodigo","Guia.DataRealizacao",
 "Beneficiario Codigo","Beneficiario Nome",
 "Beneficiario Sexo","Beneficiario Faixa Etaria",
 "Contrato GrupoEmpresa","Contrato Tipo Empresa Detalhado",
-"Credenciado Classe","Executante Nome",
-"Executante Especialidade Principal")
+"Credenciado Classe","Credenciado Nome","Executante Nome",
+"Executante Especialidade Principal", "Solicitante Nome", 
+"Solicitante Especialidade Principal")
 
 dadosunion0517 <- dadosunion0517 %>% select(nome)
 dadosunion0617 <- dadosunion0617 %>% select(nome)
@@ -250,6 +252,10 @@ dadosgerais3 <- bind_rows(dadosgerais2, dadosunion1017,dadosunion1117,
 dadosfinais <- bind_rows(dadosgerais3, dadosunion0118,dadosunion0218)
 
 gc()
+
+rm(dadosgerais,dadosgerais2,dadosgerais3,nome,dadosunion0118,dadosunion0218,
+   dadosunion0517,dadosunion0617,dadosunion0717,dadosunion0817,dadosunion0917,
+   dadosunion1017,dadosunion1117,dadosunion1217)
 save(dadosfinais,file = "basegeralj05a02.RData")
 
 ### INCLUINDO CBHPM NOS DADOS
@@ -274,21 +280,15 @@ baseproduto <- unif %>% filter(`Contrato GrupoEmpresa`%in% c(
   "COLABORADOR MAIS","REAL MOTO PECAS MAIS","UNIMED MAIS",
   "ALGAR MAIS","FAEPU MAIS","UFU MAIS"))
 
-baseproduto <- baseproduto %>% filter(`Credenciado Classe` != 
+baseprodutosom.int <- baseproduto %>% filter(`Credenciado Classe` == 
                                         "Intercâmbio Unimed")
 
 ### BASE SOMENTE CIAS ###
 
-baseCIAS <- baseproduto %>% filter(`Executante Nome` %in% c("Cias 
-                            Centro Integrado de Atencao A 
-                           Saude Unimed Uberlandia",
-                           "Erica Maria Ferreira de Oliveira",
-                           "Kenia Pereira Vilela",
-                           "Camila Cristina Santos Simamoto Lopes",
-                           "Fernanda Batista de Melo Otoni")| 
-                             `Credenciado Classe` == "CIAS")
+baseCIAS <- unif %>% filter(`Credenciado Nome` %in% c(
+  "Cias Centro Integrado de Atencao A Saude Unimed Uberlandia",
+  "Kenia Pereira Vilela")| Guia.OrigemCodigo == 99)
 
-baseCIAS <- baseCIAS %>% filter(`Credenciado Classe` != "Intercâmbio Unimed")
 
 baseCIAS <- baseCIAS  %>% filter((
   Guia.ProcedimentoQuantAutorizadaAjustado != 0 &
@@ -309,8 +309,10 @@ objetoCIAS <- baseCIAS %>% group_by(NomeCap,NomeGrupo,NomeSubGrupo,
                            `Procedimento Codigo`,`Procedimento Nome`) %>% 
                summarise(n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado),
                                      n.benef=n_distinct(`Beneficiario Nome`),
-                                 valor= sum(Guia.ProcedimentoVlrPagoAjustado),
-                 cpb = round(valor/n.benef, 4), cpp = round(valor/n.proc, 4))
+                          valor.pago= sum(Guia.ProcedimentoVlrPagoAjustado),
+         cpb = round(valor.pago/n.benef, 4), cpp = round(valor.pago/n.proc, 4))
+
+baseCIAS$`Procedimento Codigo` <- as.character(baseCIAS$`Procedimento Codigo`)
 
 ### UNIAO DAS BASES E ANALISE A NIVEL PROCEDIMENTO ###
 
@@ -334,8 +336,8 @@ med.atv.inat$valor <- as.numeric(med.atv.inat$valor)
 colnames(med.atv.inat)[1] <- "Procedimento Codigo"
 colnames(mat.atv.inat)[1] <- "Procedimento Codigo"
 
-base.mat <- mat.atv.inat[,c("Procedimento Codigo","valor","Versão")]
-base.med <- med.atv.inat[,c("Procedimento Codigo","valor","Versão")]
+base.mat <- mat.atv.inat[,c("Procedimento Codigo","valor","versão")]
+base.med <- med.atv.inat[,c("Procedimento Codigo","valor","versão")]
 
 ### UNINDO BASE DE MEDICAMENTOS E MATERIAIS
 
@@ -346,11 +348,11 @@ base.med.mat <- bind_rows(mat.atv.inat,med.atv.inat)
 base.med.mat$`Procedimento Codigo` <- as.character(
   base.med.mat$`Procedimento Codigo`)
 
-base.med.mat.cias <- base.med.mat %>% filter(Versão == "CIAS")
+base.med.mat.cias <- base.med.mat %>% filter(versão == "CIAS")
 
 ### UNINDO BASE DE SERVICOS DO CIAS COM A DE MEDICAMENTOS E MATERIAIS DO MSM ##
 
-objetototal <- left_join(objetunion, base.med.mat.cias,
+objetototal <- left_join(objetoCIAS, base.med.mat.cias,
                          by="Procedimento Codigo")
 
 ### JUNTANDO VALORES DE PAGAMENTO NA MESMA COLUNA ###
@@ -418,16 +420,30 @@ unif$id<-1:nrow(unif)
 
 baseREDE <- anti_join(unif,baseCIAS, by="id")
 
+baseREDE <- baseREDE %>% select(-c(CodCap,CodGrupo,CodSubGrupo,V7))
+
 ### ANALISE BASE REDE A NIVEL PROCEDIMENTO E BENEFICIARIO
 
 objetoREDE<- baseREDE %>% group_by(`Procedimento Classe`,`Beneficiario Codigo`,
                                     `Beneficiario Nome`,`Procedimento Codigo`,
-                                    Comp,NomeSubGrupo,id,
-                                   `Contrato GrupoEmpresa`) %>% summarise(
-                          n.proc.cons = sum(estr == 1),n.proc = sum(estr != 1))
+                       NomeSubGrupo,id,`Contrato GrupoEmpresa`) %>% summarise(
+                       n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado),
+                       n.benef=n_distinct(`Beneficiario Nome`),
+                       valor.pago= sum(Guia.ProcedimentoVlrPagoAjustado),
+                       cpb = round(valor.pago/n.benef, 4),
+                       cpp = round(valor.pago/n.proc, 4))
 
 objetoREDE2 <- objetoREDE %>% filter(n.proc.cons != 1 | n.proc != 0)
 
+baseproduto$`Beneficiario Codigo` <- as.character(
+  baseproduto$`Beneficiario Codigo`)
+
+baseprodutoSELECT <- baseproduto %>% filter(
+  `Beneficiario Codigo` == 1134672) 
+
+levels(as.factor(baseproduto$`Executante Especialidade Principal`))
+
+write.csv(baseprodutoSELECT, file = "baseprodutoclienteespec.csv")
 
 ### TRATANDO E FILTRANDO BASE DE MEDICAMENTOS E MATERIAIS JA UNIDA ###
 
@@ -443,7 +459,7 @@ base.med.mat.rede <- spread(base.med.mat.rede, versão, round(valor,4))
 
 base.med.mat.rede.filt <- base.med.mat.rede %>% filter(CIAS != Hospitalar)
 
-base.med.mat.rede <- left_join(base.med.mat.rede,base.med.mat.rede.media,
+base.med.mat.rede.grp.m <- left_join(base.med.mat.rede,base.med.mat.rede.media,
                                by="Procedimento Codigo")
 
 base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
@@ -454,7 +470,3 @@ base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
 objetototal <- left_join(objetunion, base.med.mat.rede,
                          by="Procedimento Codigo")
 
-#######################################################################
-
-baseREDE <- subset(baseREDE, select = -c(CodCap, CodGrupo))
-baseREDE <- subset(baseREDE, select = -c(CodSubGrupo, V7))
