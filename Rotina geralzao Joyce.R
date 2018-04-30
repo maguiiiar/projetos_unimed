@@ -4,6 +4,7 @@ require(readxl)
 require(data.table)
 require(tidyr)
 require(openxlsx)
+require(stringr)
 
 ### BASE FINALIZADA ###
 
@@ -14,7 +15,7 @@ load("basegeralcomidunifj0512.RData")
 dadosfinais <- list.files(pattern = "*.txt") %>% 
   lapply(fread,colClasses = c(`Beneficiario Codigo`="character", 
                               `Procedimento Codigo`="character"),
-         stringsAsFactors=F, 
+         stringsAsFactors=F, encoding="UTF-8",
          select=c("%Competencia","Guia.OrigemCodigo","Guia.DataRealizacao",
                   "Guia.ProcedimentoQuantAutorizadaAjustado",
                   "Guia.ProcedimentoVlrPagoAjustado","Procedimento Codigo",
@@ -185,7 +186,7 @@ objetoteste <- baseCIAS %>% group_by(`Beneficiario Nome`,
 
 unif$id<-1:nrow(unif) 
 
-baseREDE <- anti_join(unif,baseCIAS, by="id")
+baseREDE <- anti_join(unif,baseproduto, by="id")
 
 baseREDE <- baseREDE %>% select(-c(CodCap,CodGrupo,CodSubGrupo,V7))
 
@@ -206,7 +207,7 @@ baseproduto$`Beneficiario Codigo` <- as.character(
   baseproduto$`Beneficiario Codigo`)
 
 baseprodutoSELECT <- baseproduto %>% filter(
-  `Beneficiario Codigo` == 1134672) 
+  `Beneficiario Codigo` == "01134672") 
 
 levels(as.factor(baseproduto$`Executante Especialidade Principal`))
 
@@ -237,3 +238,17 @@ base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
 objetototal <- left_join(objetunion, base.med.mat.rede,
                          by="Procedimento Codigo")
 
+
+
+
+#### COMPOSICAO DA CONSULTA ####
+
+testando <- baseproduto %>% select(Guia.DataRealizacao, `Procedimento Codigo`,
+                                   `Procedimento Nome`,`Beneficiario Codigo`)
+
+testando$Guia.DataRealizacao <- as.Date(testando$Guia.DataRealizacao,
+                                        format = "%d/%m/%Y")
+
+testandofiltrado <- testando %>% filter( str_detect(`Procedimento Nome`,
+                                        "Consulta"))
+levels(as.factor(testandofiltrado$`Procedimento Codigo`))
