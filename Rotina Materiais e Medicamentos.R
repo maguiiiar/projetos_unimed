@@ -1,57 +1,121 @@
 require(data.table)
 require(dplyr)
 
-base.mat.cias = fread("Tabela Unimed Uberlândia de Materiais Cias - Versão 1.14 - Vigência 12.04.2018.csv", h = T, sep=";")
-base.mat.clh = fread("Tabela Unimed Uberlândia de Materiais CLH-Versão 2.24 - Vigência - 12.04.2018.csv", h = T, sep=";")
-base.mat.hosp = fread("Tabela Unimed Uberlândia de Materiais Hospitalares - Versão 5.7 - Vigência 13.04.2018.csv", h=T, sep=";")
-base.mat.onco = fread("Tabela Unimed Uberlândia de Materiais Oncológicos Versão-2.12 -  Vigência - 12.04.2018.csv", h=T, sep=";")
+# Materiais ativos
+mat.cias.atv = fread("Tabela Unimed Uberlândia de Materiais Cias - Versão 1.14 - Vigência 12.04.2018 - Ativos.csv", h = T, sep=";")
+mat.clh.atv = fread("Tabela Unimed Uberlândia de Materiais CLH-Versão 2.24 - Vigência - 12.04.2018 - Ativos.csv", h = T, sep=";")
+mat.hosp.atv = fread("Tabela Unimed Uberlândia de Materiais Hospitalares - Versão 5.7 - Vigência 13.04.2018 - Ativos.csv", h=T, sep=";")
+mat.onco.atv = fread("Tabela Unimed Uberlândia de Materiais Oncológicos Versão-2.12 -  Vigência - 12.04.2018 - Ativos.csv", h=T, sep=";")
 
-base.med.cias = fread("Tabela Unimed Uberlândia de Medicamentos Cias - Versão 1.9.5 - Vigência 01.04.2018.csv", h=T, sep = ";")
-base.med.clh = fread("Tabela Unimed Uberlândia de Medicamentos CLH - Versão 7.23 - Vigência 01-04-2018.csv", h=T, sep=";")
-base.med.hosp = fread("Tabela Unimed Uberlândia de Medicamentos Hospitalar - Versão 10.7 - Vigência. 01.04.2018.csv", h=T, sep=";")
-base.med.onco = fread("Tabela Unimed Uberlandia de Medicamentos Oncológicos- Versão 4.13 - Vigência 01.04.2018.csv", h=T, sep=";")
+# Medicamentos ativos
+med.cias.atv = fread("Tabela Unimed Uberlândia de Medicamentos Cias - Versão 1.9.5 - Vigência 01.04.2018 - Ativos.csv", h=T, sep = ";")
+med.clh.atv = fread("Tabela Unimed Uberlândia de Medicamentos CLH - Versão 7.23 - Vigência 01-04-2018 - Ativos.csv", h=T, sep=";")
+med.hosp.atv = fread("Tabela Unimed Uberlândia de Medicamentos Hospitalar - Versão 10.7 - Vigência. 01.04.2018 - Ativos.csv", h=T, sep=";")
+med.onco.atv = fread("Tabela Unimed Uberlandia de Medicamentos Oncológicos- Versão 4.13 - Vigência 01.04.2018 - Ativos.csv", h=T, sep=";")
 
-base.med.cias$`Valor Pagamento` <- as.numeric(base.med.cias$`Valor Pagamento`)
-base.med.clh$Valor <- as.numeric(base.med.clh$Valor)
-base.med.hosp$`Valor Pagamento` <- as.numeric(base.med.hosp$`Valor Pagamento`)
-base.med.onco$Valor <- as.numeric(base.med.onco$Valor)
+# Materiais adicionados
+mat.clh.adc = fread("Tabela Unimed Uberlândia de Materiais CLH-Versão 2.24 - Vigência - 12.04.2018 - Adicionados.csv", h = T, sep=";")
+mat.cias.adc = fread("Tabela Unimed Uberlândia de Materiais Cias - Versão 1.14 - Vigência 12.04.2018 - Adicionados.csv", h = T, sep=";")
+mat.hosp.adc = fread("Tabela Unimed Uberlândia de Materiais Hospitalares - Versão 5.7 - Vigência 13.04.2018 - Adicionados.csv", h=T, sep=";")
+mat.onco.adc = fread("Tabela Unimed Uberlândia de Materiais Oncológicos Versão-2.12 -  Vigência - 12.04.2018 - Adicionados.csv", h=T, sep=";")
 
+# Medicamentos adicionados
+med.cias.adc = fread("Tabela Unimed Uberlândia de Medicamentos Cias - Versão 1.9.5 - Vigência 01.04.2018 - Adicionados.csv", h=T, sep = ";")
+#med.clh.adc = fread("Tabela Unimed Uberlândia de Medicamentos CLH - Versão 7.23 - Vigência 01-04-2018 - Adicionados.csv", h=T, sep=";")
+med.hosp.adc = fread("Tabela Unimed Uberlândia de Medicamentos Hospitalar - Versão 10.7 - Vigência. 01.04.2018 - Adicionados.csv", h=T, sep=";")
+med.onco.adc = fread("Tabela Unimed Uberlandia de Medicamentos Oncológicos- Versão 4.13 - Vigência 01.04.2018 - Adicionados.csv", h=T, sep=";")
 
-base.mat.cias = base.mat.cias %>% select(`Código - versão TISS 3.03.03`, `Nome Comercial`, `Descrição do Produto`, `Especialidade do Produto`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome Comercial`, descrição = `Descrição do Produto`, especialidade  = `Especialidade do Produto`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "CIAS", Tipo = "Material")     
-base.mat.clh = base.mat.clh %>% select(`Código - versão TISS 3.03.03`, `Nome Comercial`, `Descrição do Produto`, `Especialidade do Produto`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome Comercial`, descrição = `Descrição do Produto`, especialidade  = `Especialidade do Produto`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "CLH", Tipo = "Material")     
-base.mat.hosp = base.mat.hosp %>% select(`Código - versão TISS 3.03.03`, `Nome Comercial`, `Descrição do Produto`, `Especialidade do Produto`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome Comercial`, descrição = `Descrição do Produto`, especialidade  = `Especialidade do Produto`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "Hospitalar", Tipo = "Material")     
-base.mat.onco = base.mat.onco %>% select(`Código - versão TISS 3.03.03`, `Nome Comercial`, `Descrição do Produto`, `Especialidade do Produto`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome Comercial`, descrição = `Descrição do Produto`, especialidade  = `Especialidade do Produto`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "Oncológico", Tipo = "Material")    
+# Materiais inativos
+mat.cias.inat = fread("Tabela Unimed Uberlândia de Materiais Cias - Versão 1.14 - Vigência 12.04.2018 - Inativos.csv", h = T, sep=";")
+mat.clh.inat = fread("Tabela Unimed Uberlândia de Materiais CLH-Versão 2.24 - Vigência - 12.04.2018 - Inativos.csv", h = T, sep=";")
+mat.hosp.inat = fread("Tabela Unimed Uberlândia de Materiais Hospitalares - Versão 5.7 - Vigência 13.04.2018 - Inativos.csv", h=T, sep=";")
+mat.onco.inat = fread("Tabela Unimed Uberlândia de Materiais Oncológicos Versão-2.12 -  Vigência - 12.04.2018 - Inativos.csv", h=T, sep=";")
 
-base.med.cias = base.med.cias %>% select(`Código - versão TISS 3.03.02`, `Nome e Apresentação Comercial`, `Grupo Farmacológico`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.02`, nome = `Nome e Apresentação Comercial`, grupo = `Grupo Farmacológico`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "CIAS", Tipo = "Medicamento") 
-base.med.hosp = base.med.hosp %>% select(`Código - versão TISS 3.03.03`, `Nome e Apresentação Comercial`, `Grupo Farmacológico`, `Valor Pagamento`) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome e Apresentação Comercial`, grupo = `Grupo Farmacológico`, valor = `Valor Pagamento`) %>%
-                                  mutate(Versão = "Hospitalar", Tipo = "Medicamento") 
-base.med.clh = base.med.clh   %>% select(`Código - versão TISS 3.03.03`, `Nome e Apresentação Comercial`, `Grupo Farmacológico`, Valor) %>%
-                                  rename("código" = `Código - versão TISS 3.03.03`, nome = `Nome e Apresentação Comercial`, grupo = `Grupo Farmacológico`, valor = Valor) %>%
-                                  mutate(Versão = "CLH", Tipo = "Medicamento") 
-base.med.onco = base.med.onco %>% select(`Código - versão TISS 3.03.02`, `Nome e Apresentação Comercial`, `Grupo Farmacológico`, Valor) %>%
-                                  rename("código" = `Código - versão TISS 3.03.02`, nome = `Nome e Apresentação Comercial`, grupo = `Grupo Farmacológico`, valor = Valor) %>%
-                                  mutate(Versão = "Oncológico", Tipo = "Medicamento") 
+# Medicamentos inativos
+med.cias.inat = fread("Tabela Unimed Uberlândia de Medicamentos Cias - Versão 1.9.5 - Vigência 01.04.2018 - Inativos.csv", h=T, sep = ";")
+med.clh.inat = fread("Tabela Unimed Uberlândia de Medicamentos CLH - Versão 7.23 - Vigência 01-04-2018 - Inativos.csv", h=T, sep=";")
+med.hosp.inat = fread("Tabela Unimed Uberlândia de Medicamentos Hospitalar - Versão 10.7 - Vigência. 01.04.2018 - Inativos.csv", h=T, sep=";")
+med.onco.inat = fread("Tabela Unimed Uberlandia de Medicamentos Oncológicos- Versão 4.13 - Vigência 01.04.2018 - Inativos.csv", h=T, sep=";")
 
-base.mat = rbind(base.mat.cias, base.mat.clh, base.mat.hosp, base.mat.onco)
-base.med = rbind(base.med.cias, base.med.clh, base.med.hosp, base.med.onco)
+# Junção de materiais ativos
+mat.cias.atv = mat.cias.atv %>% select(código, nome, descrição, especialidade, valor) %>%
+                                mutate(versão = "CIAS", tipo = "Material", status = "Ativo") 
+mat.clh.atv = mat.clh.atv %>% select(código, nome, descrição, especialidade, valor) %>%
+                              mutate(versão = "CLH", tipo = "Material", status = "Ativo") 
+mat.hosp.atv = mat.hosp.atv %>% select(código, nome, descrição, especialidade, valor) %>%
+                                mutate(versão = "Hospitalar", tipo = "Material", status = "Ativo") 
+mat.onco.atv = mat.onco.atv %>% select(código, nome, descrição, especialidade, valor) %>%
+                                mutate(versão = "Oncológico", tipo = "Material", status = "Ativo")    
 
-base.med$valor = as.numeric(base.med$valor)
+mat.atv = rbind(mat.cias.atv, mat.clh.atv, mat.hosp.atv, mat.onco.atv); rm(mat.cias.atv, mat.clh.atv, mat.hosp.atv, mat.onco.atv)
 
-rm(base.mat.cias, base.mat.clh, base.mat.hosp, base.mat.onco, base.med.cias, base.med.clh, base.med.hosp, base.med.onco); gc(); gc()
+# Junção de medicamentos ativos
+med.cias.atv = med.cias.atv %>% select(código, nome, princípio, grupo, classe, valor) %>%
+                                mutate(versão = "CIAS", tipo = "Medicamento", status = "Ativo") 
+med.hosp.atv = med.hosp.atv %>% select(código, nome, princípio, grupo, classe, valor) %>%
+                                mutate(versão = "Hospitalar", tipo = "Medicamento", status = "Ativo") 
+med.clh.atv = med.clh.atv   %>% select(código, nome, princípio, grupo, classe, valor) %>%
+                                mutate(versão = "CLH", tipo = "Medicamento", status = "Ativo") 
+med.onco.atv = med.onco.atv %>% select(código, nome, princípio, grupo, classe, valor) %>%
+                                mutate(versão = "Oncológico", tipo = "Medicamento", status = "Ativo") 
 
-save(base.mat, file="base.materiais.RData")
-save(base.med, file="base.medicamentos.RData")
+med.atv = rbind(med.cias.atv, med.clh.atv, med.hosp.atv, med.onco.atv); rm(med.cias.atv, med.clh.atv, med.hosp.atv, med.onco.atv)
+
+# Junção de materiais adicionados
+mat.cias.adc = mat.cias.adc %>% select(código, nome, descrição, especialidade, vigência) %>%
+                                mutate(versão = "CIAS", tipo = "Material", status = "Adicionado")     
+mat.clh.adc = mat.clh.adc %>% select(código, nome, descrição, especialidade, vigência) %>%
+                              mutate(versão = "CLH", tipo = "Material", status = "Adicionado") 
+mat.hosp.adc = mat.hosp.adc %>% select(código, nome, descrição, especialidade, vigência) %>%
+                                mutate(versão = "Hospitalar", tipo = "Material", status = "Adicionado")  
+mat.onco.adc = mat.onco.adc %>% select(código, nome, descrição, especialidade, vigência) %>%
+                                mutate(versão = "Oncológico", tipo = "Material", status = "Adicionado")  
+
+mat.adc = rbind(mat.cias.adc, mat.clh.adc, mat.hosp.adc, mat.onco.adc); rm(mat.cias.adc, mat.clh.adc, mat.hosp.adc, mat.onco.adc)
+
+# Junção de medicamentos adicionados
+med.cias.adc = med.cias.adc %>% select(código, nome, princípio, grupo, classe, vigência) %>%
+                                mutate(versão = "CIAS", tipo = "Material", status = "Adicionado")     
+# med.clh.adc = med.clh.adc %>% select(código, nome, princípio, grupo, classe, vigência) %>%
+#                               mutate(versão = "CLH", tipo = "Material", status = "Adicionado") 
+med.hosp.adc = med.hosp.adc %>% select(código, nome, princípio, grupo, classe, vigência) %>%
+                              mutate(versão = "Hospitalar", tipo = "Material", status = "Adicionado")  
+med.onco.adc = med.onco.adc %>% select(código, nome, princípio, grupo, classe, vigência) %>%
+                              mutate(versão = "Oncológico", tipo = "Material", status = "Adicionado")  
+
+med.adc = rbind(med.cias.adc, med.hosp.adc, med.onco.adc); rm(med.cias.adc, med.hosp.adc, med.onco.adc)
+
+# Junção de materiais inativos
+mat.cias.inat = mat.cias.inat %>% select(código, nome, descrição, especialidade) %>%
+  mutate(versão = "CIAS", tipo = "Material", status = "Inativo")     
+mat.clh.inat = mat.clh.inat %>% select(código, nome, descrição, especialidade) %>%
+  mutate(versão = "CLH", tipo = "Material", status = "Inativo") 
+mat.hosp.inat = mat.hosp.inat %>% select(código, nome, descrição, especialidade) %>%
+  mutate(versão = "Hospitalar", tipo = "Material", status = "Inativo")  
+mat.onco.inat = mat.onco.inat %>% select(código, nome, descrição, especialidade) %>%
+  mutate(versão = "Oncológico", tipo = "Material", status = "Inativo")  
+
+mat.inat = rbind(mat.cias.inat, mat.clh.inat, mat.hosp.inat, mat.onco.inat); rm(mat.cias.inat, mat.clh.inat, mat.hosp.inat, mat.onco.inat)
+
+# Junção de medicamentos inativos
+med.cias.inat = med.cias.inat %>% select(código, nome, princípio, grupo, classe) %>%
+  mutate(versão = "CIAS", tipo = "Medicamento", status = "Inativo")     
+med.clh.inat = med.clh.inat %>% select(código, nome, princípio, grupo, classe) %>%
+  mutate(versão = "CLH", tipo = "Medicamento", status = "Inativo") 
+med.hosp.inat = med.hosp.inat %>% select(código, nome, princípio, grupo, classe) %>%
+  mutate(versão = "Hospitalar", tipo = "Medicamento", status = "Inativo")  
+med.onco.inat = med.onco.inat %>% select(código, nome, princípio, grupo, classe) %>%
+  mutate(versão = "Oncológico", tipo = "Medicamento", status = "Inativo")  
+
+med.inat = rbind(med.cias.inat, med.clh.inat, med.hosp.inat, med.onco.inat); rm(med.cias.inat, med.clh.inat, med.hosp.inat, med.onco.inat)
+
+# Junção das bases de materiais (ativos e inativos)
+
+mat.atv.inat = bind_rows(mat.atv, mat.inat)
+med.atv.inat = bind_rows(med.atv, med.inat)
+
+save(mat.atv.inat, file="base.mat.atv.inat.RData")
+save(med.atv.inat, file="base.med.atv.inat.RData")
 
 list.files(pattern = "*.csv")
 
