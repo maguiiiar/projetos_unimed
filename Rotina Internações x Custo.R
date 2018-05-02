@@ -2,16 +2,20 @@ require(data.table)
 library(dplyr)
 library(readr)
 
-dados.drg <- fread("Base DRG Brasil 2016 e 2017.csv", sep = ";", h = T, encoding = "UTF-8")
+dados.drg <- fread("Base DRG Brasil 2016 e 2017.csv", sep = ";", h = T, encoding = "UTF-8", select = c())
 
 list_file <- list.files(pattern = "*.txt") %>% 
-  lapply(fread, stringsAsFactors=F, encoding = "UTF-8", dec = ",",colClasses = c("Guia.ProcedimentoVlrPago" = "numeric"), select=c("Competencia","Contrato Tipo Empresa","Guia.SenhaAutorizacao","Guia.ProcedimentoVlrPago")) %>% bind_rows
+             lapply(fread, stringsAsFactors=F, encoding = "UTF-8", dec = ",",
+                    colClasses = c("Guia.ProcedimentoVlrPago" = "numeric"), 
+                    select=c("Competencia","Contrato Tipo Empresa","Guia.SenhaAutorizacao","Guia.ProcedimentoVlrPago")) %>% 
+             bind_rows
                               
-dados <- list_file %>% group_by(`Competencia`,`Contrato Tipo Empresa`,Guia.SenhaAutorizacao) %>% summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE))
+dados <- list_file %>% group_by(`Competencia`,`Contrato Tipo Empresa`,Guia.SenhaAutorizacao) %>% 
+                       summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE))
 names(dados)[3] = "Número da Autorização"
 dados$`Número da Autorização` = as.character(dados$`Número da Autorização`)
 
-dados.int.custo = left_join(dados.drg, dados, by = "Número da Autorização")
+dados.int.custo.anti = right_join(dados.drg, dados, by = "Número da Autorização")
 
 # filtro = dados %>% filter(`Número da Autorização` == "156818251")
 
