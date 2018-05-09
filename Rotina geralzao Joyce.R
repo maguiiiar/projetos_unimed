@@ -317,9 +317,9 @@ baseproduto.proccias <-baseproduto.proccias %>% select(`Beneficiario Codigo`,
 testando3 <- baseproduto.proccias %>% filter(
   `Procedimento Codigo` == "10101039" | `Procedimento Codigo` == "10101012")
 
-levels(as.factor(testando3$`Solicitante Especialidade Principal`))
-levels(as.factor(testando3$`Executante Especialidade Principal`))
-
+# levels(as.factor(testando3$`Solicitante Especialidade Principal`))
+# levels(as.factor(testando3$`Executante Especialidade Principal`))
+# 
 
 testando3$chave.ps <- paste(substr(testando3$`Beneficiario Nome`,1,10), 
                             "#",testando3$Guia.DataRealizacao)
@@ -337,8 +337,8 @@ names(composicaomais)
 composicaomais <- composicaomais %>% filter(!`Credenciado Nome` %in% c(
   "Cias Centro Integrado de Atencao A Saude Unimed Uberlandia",
   "Kenia Pereira Vilela")| Guia.OrigemCodigo != 99)
-                                
 
+composicaomais <- composicaomais %>% distinct()
 composicaomais$dif <- composicaomais$Guia.DataRealizacao - 
   composicaomais$Guia.DataRealizacao.ps
 
@@ -349,21 +349,20 @@ maisvisu1 <- composicaomais %>% filter(dif <= 60 & dif >= 0) %>% group_by(
                           `Beneficiario Codigo`, `Beneficiario Nome`,
                         `Solicitante Especialidade Principal`, chave.ps, 
                         Guia.DataRealizacao.ps,`Procedimento Codigo.ps`) %>%
-                 summarise(comp.consult = ifelse(sum(dif2) == 0,
-                  sum(Guia.ProcedimentoVlrPagoAjustado),
-                   ifelse(between(Guia.DataRealizacao,
-                                  lower = Guia.DataRealizacao.ps, 
-                                  upper = Guia.DataRealizacao.ps),
-                          sum(Guia.ProcedimentoVlrPagoAjustado),NA)),
-            qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-                          valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
+                 summarise(comp.consult = ifelse(sum(dif2) == 1, 
+                  ifelse(`Procedimento Codigo` == "10101012" | 
+                         `Procedimento Codigo` == "10101039",
+                    NA, ifelse(
+                    Guia.DataRealizacao == Guia.DataRealizacao.ps,
+                    sum(Guia.ProcedimentoVlrPagoAjustado),NA)),
+             sum(Guia.ProcedimentoVlrPagoAjustado)),
+                   qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
+                   valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
 
-write.csv(novabase, file = "identflag.csv")
-
-# taxas <- baseproduto %>% filter(`Procedimento Nome` == 
-#                                   "Taxa Pronto Atendimento")
-# 
-# levels(as.factor(taxas$`Credenciado Nome`))
+#taxas <- baseproduto %>% filter(`Procedimento Nome` == "Taxa Pronto
+#Atendimento")
+#
+#levels(as.factor(taxas$`Credenciado Nome`))
 
 # baseexameespec <- baseproduto %>% filter(`Procedimento Codigo`=="40802051",
 #                                          `Credenciado Nome` != 
@@ -426,7 +425,8 @@ baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,`Beneficiario Nome`,
                                 Guia.ProcedimentoQuantAutorizadaAjustado,
                                 Guia.ProcedimentoVlrPagoAjustado)
 
-testando4 <- baseCIAS %>% filter(`Procedimento Codigo` == "10101012")
+testando4 <- baseCIAS %>% filter(`Procedimento Codigo` == "10101012" |
+                                   `Procedimento Codigo` == "50000608")
 
 testando4$chave.ce <- paste(substr(testando4$`Beneficiario Nome`,1,10), 
                             "#",testando4$Guia.DataRealizacao)
@@ -455,8 +455,8 @@ composicaocias$dif2 <- ifelse(composicaocias$dif > 0 &
                                 composicaocias$dif <= 60, 1,0)
 
 ciasvisu1 <- composicaocias %>% filter(dif <= 60 & dif >= 0) %>% group_by(
-  `Beneficiario Codigo`, `Beneficiario Nome`,
-  `Solicitante Especialidade Principal`, chave.ce, 
+  `Beneficiario Codigo`, `Beneficiario Nome`, Guia.DataRealizacao,
+  `Solicitante Especialidade Principal`,chave.ce, 
   Guia.DataRealizacao.ce,`Procedimento Codigo.ce`) %>%
   summarise(comp.consult = ifelse(sum(dif2) == 0,
                                   sum(Guia.ProcedimentoVlrPagoAjustado),
@@ -466,3 +466,6 @@ ciasvisu1 <- composicaocias %>% filter(dif <= 60 & dif >= 0) %>% group_by(
                          sum(Guia.ProcedimentoVlrPagoAjustado),NA)),
             qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
             valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
+
+
+write.csv(ciasvisu1, file = "composicaocias.csv")
