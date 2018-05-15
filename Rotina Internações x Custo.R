@@ -3,20 +3,23 @@ library(dplyr)
 library(readr)
 
 dados.drg.2016.2017 <- fread("Base DRG Brasil 2016 e 2017.csv", sep = ";", h = T, encoding = "UTF-8", 
-                             select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta"))
-dados.drg.2018 <- fread("20180509001_drgrp_maria.christina.csv", sep = ";", h = T)
+                             select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta")) %>% distinct()
+dados.drg.2018 <- fread("20180509001_drgrp_maria.christina.csv", sep = ";", h = T,
+                        select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta")) %>% distinct()
 
                         #select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta"))
-dados.drg = bind_rows(dados.drg.2016.2017, dados.drg.2018)
+dados.drg.2018$`Número da Autorização` = as.character(dados.drg.2018$`Número da Autorização`)
+dados.drg.2018$`Código do Paciente` = as.character(dados.drg.2018$`Código do Paciente`)
+dados.drg = bind_rows(dados.drg.2016.2017, dados.drg.2018); rm(dados.drg.2018, dados.drg.2016.2017)
 
 list_file <- list.files(pattern = "*.txt") %>% 
              lapply(fread, stringsAsFactors=F, encoding = "UTF-8", dec = ",", sep = "|",
                     colClasses = c("Guia.ProcedimentoVlrPago" = "numeric"), 
-                    select=c("Competencia","Guia.SenhaAutorizacao","Plano Registro ANS","Guia.ProcedimentoVlrPago")) %>% 
-             bind_rows
+                    select=c("Competencia","Guia.SenhaAutorizacao","Plano Registro ANS","Guia.ProcedimentoVlrPago","Guia.CustoAssistencialNome","Guia.ClasseNome")) %>% 
+             bind_rows %>% distinct()
                               
-dados <- list_file %>% group_by(`Competencia`,Guia.SenhaAutorizacao, `Plano Registro ANS`) %>% 
-                       summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE))
+dados <- list_file %>% filter(substr(Guia.CustoAssistencialNome, 1, 10) == "Internação") %>% group_by(`Competencia`,Guia.SenhaAutorizacao, `Plano Registro ANS`) %>% 
+                       summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE)) %>% distinct
 names(dados)[2] = "Número da Autorização"
 dados$`Número da Autorização` = as.character(dados$`Número da Autorização`)
 dados$Plano = ifelse(dados$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "SCPA 203", "SCPA 204", 
@@ -53,14 +56,12 @@ dados$Plano = ifelse(dados$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "
                                                               "Registro ANS 473014143", "Registro ANS 475135153", 
                                                               "Registro ANS 476228162", "Registro ANS 478134171"), 
                             "Coletivo", NA))
+table(is.na(dados$Plano))
 
+dados <- dados %>% group_by(Competencia, "Número da Autorização", Plano, Valor.Pago) %>% distinct()
 
-
-dados <- 
-
-dados.int.custo = left_join(dados.drg.2016.2017, dados, by = "Número da Autorização")
-dados.int.custo = dados.int.custo %>% group_by(`Número da Autorização`, Competencia, `Data de Internação`, `Data da Alta`, `Plano`) %>% summarise(Valor.Pago = sum(Valor.Pago))
-dados.int.custo = dados.int.custo %>% filter(!is.na(Plano))
+dados.int.custo = left_join(dados.drg, dados, by = "Número da Autorização")
+dados.int.custo = dados.int.custo %>% group_by(`Número da Autorização`, Competencia, `Data de Internação`, `Data da Alta`, `Plano`) %>% summarise(Valor.Pago = sum(Valor.Pago, na.rm=TRUE))
 table(is.na(dados.int.custo$Valor.Pago))
 
 # filtro = dados %>% filter(`Número da Autorização` == "156818251")
@@ -71,7 +72,7 @@ y <- dados.int.custo %>% select("Competencia","Contrato Tipo Empresa","Data da A
 #mes.alta, ano.alta
 
 vis.comp <- dados.int.custo %>% select("Competencia","Data de Internação","Data da Alta","Número da Autorização","Plano","Valor.Pago") %>% mutate(mes.alta = format(as.Date(`Data da Alta`, format = "%d/%m/%Y"), "%m"), ano.alta = format(as.Date(`Data da Alta`, format = "%d/%m/%Y"), "%Y")) %>%
-  group_by(mes.alta, ano.alta) %>% summarise(n = n_distinct(`Número da Autorização`), valor.pago = sum(Valor.Pago, na.rm = TRUE), ticket.medio = valor.pago/n)
+  group_by(Competencia, Plano) %>% summarise(n = n_distinct(`Número da Autorização`), valor.pago = sum(Valor.Pago, na.rm = TRUE), ticket.medio = valor.pago/n)
 
 vis.comp <- vis.comp %>% filter(!is.na(Plano))
 
@@ -100,3 +101,10 @@ cases.201712.2 = cases.201712 %>% filter(is.na(Valor.Pago)) %>%
                                   select("Número da Autorização", "Competencia", "Valor.Pago", "mes.alta", "ano.alta", "mes.inter", "ano.inter") %>%
                                   group_by(mes.alta, ano.alta) %>% summarise(n = n())
                                   
+write.csv(vis.comp, file="drgxqlik.csv")
+
+##################
+
+senhas.missing = anti_join(dados.drg, dados, by = "Número da Autorização") %>% distinct()
+
+vis.qlik = dados %>% group_by(Competencia) %>% summarise(n = n_distinct(`Número da Autorização`), sum = sum(Valor.Pago))
