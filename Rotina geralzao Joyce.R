@@ -19,19 +19,20 @@ dadosfinais <- list.files(pattern = "*.txt") %>%
          select=c("%Competencia","Guia.OrigemCodigo",
                   "Guia.DataSolicitacao","Guia.DataRealizacao",
                   "Guia.ProcedimentoQuantAutorizadaAjustado",
-                  "Guia.ProcedimentoVlrPagoAjustado","Procedimento Codigo",
+                "Guia.ProcedimentoVlrPagoAjustado","Procedimento Codigo",
                   "Procedimento Nome","Procedimento Classe",
                   "Beneficiario Codigo","Beneficiario Nome",
                   "Beneficiario Sexo","Beneficiario Faixa Etaria",
-                  "Contrato GrupoEmpresa","Contrato Tipo Empresa Detalhado",
-                  "Credenciado Classe","Credenciado Nome","Executante Nome",
-                  "Guia.CustoAssistencialNome",
-                  "Executante Especialidade Principal", "Solicitante Nome", 
+               "Contrato GrupoEmpresa","Contrato Tipo Empresa Detalhado",
+                  "Credenciado Classe","Credenciado Nome",
+                  "Executante Nome","Guia.CustoAssistencialNome",
+                "Executante Especialidade Principal", "Solicitante Nome",
                   "Solicitante Especialidade Principal")) %>% bind_rows
 
 ### INCLUINDO CBHPM NOS DADOS
 
-cbhpm.cod <- fread("CBHPM.csv", h=TRUE, sep = ";", na.strings = c("","NA"))
+cbhpm.cod <- fread("CBHPM.csv", h=TRUE, sep = ";", na.strings = 
+                     c("","NA"))
 
 dadosfinais$id <- substr(dadosfinais$`Procedimento Codigo`,1,5)
  
@@ -75,7 +76,7 @@ baseCIAS1 <- unif %>% filter(`Credenciado Nome` %in% c(
 
 baseCIAS <- baseCIAS1  %>% filter(
   Guia.ProcedimentoQuantAutorizadaAjustado != 0 &
-                                    Guia.ProcedimentoVlrPagoAjustado != 0)
+                                  Guia.ProcedimentoVlrPagoAjustado != 0)
 
 baseCIAS$Guia.DataRealizacao <- as.Date(
   baseCIAS$Guia.DataRealizacao,format = "%d/%m/%Y")
@@ -95,7 +96,8 @@ servicoscias$`Procedimento Codigo` <- as.character(
 
 ### ANÁLISE BASE CIAS A NIVEL PROCEDIMENTO ###
 
-baseCIAS$`Procedimento Codigo`<-as.character(baseCIAS$`Procedimento Codigo`)
+baseCIAS$`Procedimento Codigo`<-as.character(
+  baseCIAS$`Procedimento Codigo`)
 
 ### CARREGANDO BASES DE MEDICAMENTOS E MATERIAIS ###
 
@@ -144,7 +146,8 @@ base.med.mat.rede.media <- base.med.mat.rede %>% group_by(
 
 base.med.mat.rede <- spread(base.med.mat.rede, versão, round(valor,4))
 
-base.med.mat.rede.filt <- base.med.mat.rede %>% filter(CIAS != Hospitalar)
+base.med.mat.rede.filt <- base.med.mat.rede %>% filter(
+  CIAS != Hospitalar)
 
 base.med.mat.rede.grp.m <- left_join(base.med.mat.rede,
                                      base.med.mat.rede.media,
@@ -159,7 +162,8 @@ baseproduto.proccias <- inner_join(baseproduto,
                                    servicoscias,
                                    by="Procedimento Codigo")
 
-baseproduto.proccias<-baseproduto.proccias %>% select(`Beneficiario Codigo`,
+baseproduto.proccias <- baseproduto.proccias %>% select(
+                    `Beneficiario Codigo`,
                     `Beneficiario Nome`,`Beneficiario Sexo`,
                     `Credenciado Nome`,Guia.OrigemCodigo,
                     `Beneficiario Faixa Etaria`,`Procedimento Codigo`,
@@ -229,7 +233,8 @@ write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado2.csv")
 ############## CIAS ######################
 
 
-baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,`Beneficiario Nome`,
+baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,
+                                `Beneficiario Nome`,
                                `Beneficiario Sexo`,`Credenciado Nome`,
                            Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
                                `Procedimento Codigo`,`Procedimento Nome`,
@@ -258,7 +263,7 @@ composicaocias <- inner_join(baseCIAS,
 gc()
 
 composicaocias$Guia.DataSolicitacao <- if_else(
-composicaocias$Guia.DataSolicitacao <= composicaocias$Guia.DataRealizacao,
+composicaocias$Guia.DataSolicitacao <=composicaocias$Guia.DataRealizacao,
 composicaocias$Guia.DataSolicitacao,composicaocias$Guia.DataRealizacao)
 
 composicaocias <- composicaocias %>% distinct()
@@ -306,16 +311,18 @@ geometric.mean(maisvisu2$valortotal)
 
 VERIFY <- composicaomaisOUTRONOME %>% filter(
   `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                               `Procedimento Nome`) %>% 
+                                                `Procedimento Nome`) %>% 
   summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-      vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(desc(vlr))
+            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
+              desc(vlr))
 
 
 VERIFY2 <- composicaociasOUTRONOME %>% filter(
   `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                                `Procedimento Nome`) %>% 
+                                                `Procedimento Nome`) %>%
   summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-      vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(desc(vlr))
+            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
+              desc(vlr))
 
 VERIFYFINAL <- left_join(VERIFY,VERIFY2, by=c("Procedimento Codigo",
                                               "Procedimento Nome"),
