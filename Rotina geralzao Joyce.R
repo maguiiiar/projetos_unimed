@@ -41,6 +41,14 @@ cbhpm.cod$id <- as.character(cbhpm.cod$id)
 
 unif = left_join(dadosfinais, cbhpm.cod, by="id")
 
+unif$chavecomp <- rownames(unif)
+
+unif <- unif %>% filter(
+  `Executante Especialidade Principal` != "R390-Psiquiatria")
+
+unif <- unif %>% filter(
+  `Executante Especialidade Principal` != "R730-Psicologia")
+
 ### BASE PRODUTO MAIS ###
 
 baseproduto <- unif %>% filter(`Contrato GrupoEmpresa`%in% c(
@@ -55,10 +63,6 @@ baseproduto$Guia.DataRealizacao <- as.Date(
 
 baseproduto$Guia.DataSolicitacao <- as.Date(
   baseproduto$Guia.DataSolicitacao,format = "%d/%m/%Y")
-
-
-# baseprodutosom.int <- baseproduto %>% filter(`Credenciado Classe` != 
-#                                          "Intercâmbio Unimed")
 
 gc()
 
@@ -91,32 +95,7 @@ servicoscias$`Procedimento Codigo` <- as.character(
 
 ### ANÁLISE BASE CIAS A NIVEL PROCEDIMENTO ###
 
-# objeto.cias.porc <- baseCIAS %>% group_by(`Procedimento Codigo`,
-#                                           `Procedimento Nome`,
-#                                           `Beneficiario Nome`) %>% 
-#   summarise(cpp = round(sum(Guia.ProcedimentoVlrPagoAjustado)/sum(
-#     Guia.ProcedimentoQuantAutorizadaAjustado), 4),
-#     n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado))
-# 
-# contador <- objeto.cias.porc %>% count(`Beneficiario Nome`)
-# 
-# objetoCIAS <- baseCIAS %>% group_by(NomeCap,NomeGrupo,NomeSubGrupo,
-#                           `Procedimento Codigo`,`Procedimento Nome`) %>% 
-#             summarise(n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-#                                   n.benef=n_distinct(`Beneficiario Nome`),
-#                          valor.pago= sum(Guia.ProcedimentoVlrPagoAjustado),
-#      cpb = round(valor.pago/n.benef, 4), cpp = round(valor.pago/n.proc, 4))
-
-baseCIAS$`Procedimento Codigo`<- as.character(baseCIAS$`Procedimento Codigo`)
-
-### UNIAO DAS BASES E ANALISE A NIVEL PROCEDIMENTO ###
-
-objetoXservicos <- left_join(objetoCIAS,servicoscias)
-
-objetunion <- objetoXservicos %>% group_by(NomeCap,NomeGrupo,NomeSubGrupo,
-                                      `Procedimento Codigo`,
-                                   `Procedimento Nome`, cpp, n.proc,n.benef,
-                                      Valor.Pagamento.Uberlândia)
+baseCIAS$`Procedimento Codigo`<-as.character(baseCIAS$`Procedimento Codigo`)
 
 ### CARREGANDO BASES DE MEDICAMENTOS E MATERIAIS ###
 
@@ -145,100 +124,6 @@ base.med.mat$`Procedimento Codigo` <- as.character(
 
 base.med.mat.cias <- base.med.mat %>% filter(versão == "CIAS")
 
-### UNINDO BASE DE SERVICOS DO CIAS COM A DE MEDICAMENTOS E 
-### MATERIAIS DO MSM ##
-
-objetototal <- left_join(objetoCIAS, base.med.mat.cias,
-                         by="Procedimento Codigo")
-
-### JUNTANDO VALORES DE PAGAMENTO NA MESMA COLUNA ###
-
-# objetototal$Valor.Pagamento.Uberlândia <- ifelse(is.na(
-#   objetototal$Valor.Pagamento.Uberlândia), objetototal$CIAS,
-#   objetototal$Valor.Pagamento.Uberlândia)
-# 
-# objetototal$valor.y <- NULL
-# 
-# objetototal$Descrição <- NULL
-
-### CALCULO DA VARIACAO DOS VALORES DE PAGAMENTO ###
-
-# objetototal2 <- objetototal  %>% 
-#   group_by(NomeCap,NomeGrupo,NomeSubGrupo,
-#            `Procedimento Codigo`,
-#            `Procedimento Nome`, cpp, n.proc,n.benef,
-#            Valor.Pagamento.Uberlândia) %>%
-#   rowwise() %>%
-#   summarise(var = round(abs(cpp/Valor.Pagamento.Uberlândia-1),4))
-
-### UNINDO BASES PARA INCLUIR A VARIACAO DE VALORES
-
-# objeto3 <- as.data.frame(bind_cols(objetototal,objetototal2))
-# 
-# write.csv(objeto3, file = "variacoes.csv",row.names=FALSE, na="")
-
-### RETIRANDO O CAPITULO DO PROCEDIMENTO ###
-
-# baseCIAS$estr <- substr(baseCIAS$`Procedimento Codigo`,1,1)
-
-### ANÁLISE DA QUANTIDADE E SOMA DE VALORES PAGOS DO CIAS ###
-
-# objeto.produto.porc <- baseproduto %>% group_by(`Procedimento Codigo`, 
-#                       `Procedimento Nome`, `Beneficiario Codigo` ,
-#                       `Beneficiario Nome`) %>% 
-#   summarise(cpp = round(sum(Guia.ProcedimentoVlrPagoAjustado)/sum(
-#     Guia.ProcedimentoQuantAutorizadaAjustado), 4),
-#     n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado))
-# 
-# objetoproduto <- baseproduto %>% group_by(`Procedimento Codigo`,
-#                                           `Procedimento Nome`,
-#                                           `Beneficiario Codigo`, 
-#                                           `Beneficiario Nome`) %>%
-#                   summarise(valor=)
-# 
-# left <- left_join(objeto.cias.porc,objeto.produto.porc,
-#                   by="Procedimento Codigo",
-#                   suffix=c(".cias", ".produto"))
-# 
-# left2 <- left %>% group_by(`%Competencia.cias`,`%Competencia.produto`,
-#                            `Procedimento Codigo`,`Procedimento Nome`,
-#                            n.proc.cias,n.proc.produto,
-#                        cpp.cias,cpp.produto) %>% summarise(var.cias=round(
-#                             cpp.cias/cpp.produto - 1,4),var.produto=round(
-#                                cpp.produto/cpp.cias - 1,4))
-# 
-# 
-# var<-sum(objeto.cias.porc$valor.proc,na.rm = T)/sum(
-#   objetocount$conta,na.rm = T) 
-
-# objetobenef <- baseCIAS %>% group_by(`Beneficiario Nome`,
-#                                      `Procedimento Codigo`,
-#                                   `Procedimento Nome`,estr) %>% summarise(
-#                                valor=sum(Guia.ProcedimentoVlrPagoAjustado),
-#                                        n.proc = sum(
-#                                 Guia.ProcedimentoQuantAutorizadaAjustado),
-#                                  media=valor/n.proc)
-
-### ANALISE DA SOMA DE VALORES ESTRATIFICADO POR CAPITULO ###
-
-# objetoteste <- baseCIAS %>% group_by(`Beneficiario Nome`, 
-#                                  `Procedimento Codigo`,`Procedimento Nome`
-#                                      ) %>% summarise(
-#                                      n.proc.cons = sum(estr == 1),
-#                                n.proc = sum(estr != 1),
-#                                valor=sum(Guia.ProcedimentoVlrPagoAjustado),
-#                                n.proc = sum(
-#                                  Guia.ProcedimentoQuantAutorizadaAjustado))
-
-### RETIRANDO QUEM É SOMENTE CONSULTA DA BASE
-
-# objetoteste2 <- objetoteste %>% filter(n.proc.cons != 1 | n.proc != 0)
-# 
-# objetoteste2 <- objetoteste2 %>% filter(n.proc.cons != 2 | n.proc != 0)
-# 
-# objetoteste2 <- objetoteste2 %>% filter(n.proc.cons != 3 | n.proc != 0)
-
-
 ### TRATANDO BASE PARA REDE ###
 
 unif$id<-1:nrow(unif) 
@@ -247,67 +132,26 @@ baseREDE <- anti_join(unif,baseproduto, by="id")
 
 baseREDE <- baseREDE %>% select(-c(CodCap,CodGrupo,CodSubGrupo,V7))
 
-### ANALISE BASE REDE A NIVEL PROCEDIMENTO E BENEFICIARIO
-
-# objetoREDE<- baseREDE %>% group_by(`Procedimento Classe`,
-#                                    `Beneficiario Codigo`,
-#                                 `Beneficiario Nome`,`Procedimento Codigo`,
-#                     NomeSubGrupo,id,`Contrato GrupoEmpresa`) %>% summarise(
-#                      n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-#                       n.benef=n_distinct(`Beneficiario Nome`),
-#                        valor.pago= sum(Guia.ProcedimentoVlrPagoAjustado),
-#                        cpb = round(valor.pago/n.benef, 4),
-#                        cpp = round(valor.pago/n.proc, 4))
-# 
-# objetoREDE2 <- objetoREDE %>% filter(n.proc.cons != 1 | n.proc != 0)
-# 
-# baseproduto$`Beneficiario Codigo` <- as.character(
-#   baseproduto$`Beneficiario Codigo`)
-# 
-# baseprodutoSELECT <- baseproduto %>% filter(
-#   `Beneficiario Codigo` == "01134672") 
-# 
-# levels(as.factor(baseproduto$`Executante Especialidade Principal`))
-# 
-# write.csv(baseprodutoSELECT, file = "baseprodutoclienteespec.csv")
-
 ### TRATANDO E FILTRANDO BASE DE MEDICAMENTOS E MATERIAIS JA UNIDA ###
 
-# base.med.mat.rede <- base.med.mat #%>% filter(status == "ativo")
-# 
-# base.med.mat.rede.media <- base.med.mat.rede %>% group_by(
-#   `Procedimento Codigo`) %>%
-#   summarise(valor.geom=round(geometric.mean(valor, na.rm = T),4)
-#             ,valor.med = round(mean(valor,na.rm = T),4),
-#             var=round(abs(valor.geom/valor.med-1),4))
-# 
-# base.med.mat.rede <- spread(base.med.mat.rede, versão, round(valor,4))
-# 
-# base.med.mat.rede.filt <- base.med.mat.rede %>% filter(CIAS != Hospitalar)
-# 
-# base.med.mat.rede.grp.m <- left_join(base.med.mat.rede,
-#                                      base.med.mat.rede.media,
-#                                by="Procedimento Codigo")
-# 
-# base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
-#                                                       round, digits=4)
+base.med.mat.rede <- base.med.mat #%>% filter(status == "ativo")
 
-### UNINDO BASE DE SERVICOS DO CIAS COM A DE MED E MAT DO MSM ###
+base.med.mat.rede.media <- base.med.mat.rede %>% group_by(
+  `Procedimento Codigo`,nome) %>%
+  summarise(valor.geom=round(geometric.mean(valor, na.rm = T),4)
+            ,valor.med = round(mean(valor,na.rm = T),4),
+            var=round(abs(valor.geom/valor.med-1),4))
 
-# objetototal <- left_join(objetunion, base.med.mat.rede,
-#                          by="Procedimento Codigo")
+base.med.mat.rede <- spread(base.med.mat.rede, versão, round(valor,4))
 
-#### COMPOSICAO DA CONSULTA ####
+base.med.mat.rede.filt <- base.med.mat.rede %>% filter(CIAS != Hospitalar)
 
-# testando <- baseproduto %>% select(Guia.DataRealizacao,
-#`Procedimento Codigo`,
-#                                    `Procedimento Nome`,
-#`Beneficiario Codigo`)
-# 
-# testando2 <- baseCIAS %>% select(Guia.DataRealizacao, 
-#`Procedimento Codigo`,
-#                                    `Procedimento Nome`,
-#`Beneficiario Codigo`)
+base.med.mat.rede.grp.m <- left_join(base.med.mat.rede,
+                                     base.med.mat.rede.media,
+                               by="Procedimento Codigo")
+
+base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
+                                                      round, digits=4)
 
 ######### PRODUTO ########
 
@@ -315,28 +159,31 @@ baseproduto.proccias <- inner_join(baseproduto,
                                    servicoscias,
                                    by="Procedimento Codigo")
 
-names(baseproduto.proccias)
-# baseproduto.proccias$Descrição <-  NULL
-# baseproduto.proccias$Valor.Pagamento.Uberlândia <- NULL
-
-baseproduto.proccias <-baseproduto.proccias %>% select(`Beneficiario Codigo`,
+baseproduto.proccias<-baseproduto.proccias %>% select(`Beneficiario Codigo`,
                     `Beneficiario Nome`,`Beneficiario Sexo`,
                     `Credenciado Nome`,Guia.OrigemCodigo,
                     `Beneficiario Faixa Etaria`,`Procedimento Codigo`,
                     `Procedimento Nome`,Guia.DataRealizacao,
-                    Guia.DataSolicitacao,
+                    Guia.DataSolicitacao, `Procedimento Classe`,
                     `Solicitante Especialidade Principal`,
                     `Executante Especialidade Principal`,
                      Guia.ProcedimentoQuantAutorizadaAjustado, 
                      Guia.ProcedimentoVlrPagoAjustado)
 
+baseproduto.proccias<-baseproduto.proccias %>% filter(
+  `Credenciado Nome` != 
+           "Cias Centro Integrado de Atencao A Saude Unimed Uberlandia")
+baseproduto.proccias<-baseproduto.proccias %>% filter(
+  `Credenciado Nome` !="Kenia Pereira Vilela")
+baseproduto.proccias <- baseproduto.proccias %>% filter(
+  Guia.OrigemCodigo != 99)
+
 testando3 <- baseproduto.proccias %>% filter(
-  `Procedimento Codigo` == "10101039" | `Procedimento Codigo` == "10101012")
+  `Procedimento Codigo` == "10101039" |
+    `Procedimento Codigo` == "10101012")
 
-# levels(as.factor(testando3$`Solicitante Especialidade Principal`))
-# levels(as.factor(testando3$`Executante Especialidade Principal`))
 
-testando3$chave.ps <- paste(substr(testando3$`Beneficiario Nome`,1,10),
+testando3$chave.ps <- paste(testando3$`Beneficiario Codigo`,
                             "#",testando3$Guia.DataSolicitacao)
 
 testando3 <- testando3 %>% select(`Beneficiario Codigo`,
@@ -348,133 +195,57 @@ composicaomais <- inner_join(baseproduto.proccias,
                        suffix=c("",".ps"))
 
 composicaomais$Guia.DataSolicitacao <- if_else(
-  composicaomais$Guia.DataSolicitacao <= composicaomais$Guia.DataRealizacao,
+  composicaomais$Guia.DataSolicitacao <= 
+    composicaomais$Guia.DataRealizacao,
   composicaomais$Guia.DataSolicitacao,composicaomais$Guia.DataRealizacao)
 
-gc()
-names(composicaomais)
-
-composicaomais <- composicaomais %>% filter(`Credenciado Nome` != 
-            "Cias Centro Integrado de Atencao A Saude Unimed Uberlandia")
-composicaomais <- composicaomais %>% filter(`Credenciado Nome` != 
-                                              "Kenia Pereira Vilela")
-composicaomais <- composicaomais %>% filter(Guia.OrigemCodigo != 99)
 
 composicaomais <- composicaomais %>% filter(
   Guia.DataSolicitacao == Guia.DataSolicitacao.ps)
 
 composicaomais <- composicaomais %>% distinct()
-# composicaomais$dif <- composicaomais$Guia.DataSolicitacao - 
-#   composicaomais$Guia.DataSolicitacao.ps
-# 
-# composicaomais$dif2 <- ifelse(composicaomais$dif > 0 & 
-#                                 composicaomais$dif <= 60, 1,0)
 
-maisvisu1 <- composicaomais %>% group_by(`Beneficiario Codigo`,
+composicaomais12345 <- composicaomais %>% filter(
+  `Procedimento Codigo` == `Procedimento Codigo.ps`) %>% select(chave.ps)
+
+composicaomaisOUTRONOME <- left_join(composicaomais12345,composicaomais, 
+                            by = "chave.ps")
+composicaomaisOUTRONOME <- composicaomaisOUTRONOME %>% filter(
+  Guia.DataSolicitacao == Guia.DataSolicitacao.ps)
+
+composicaomaisOUTRONOME <- composicaomaisOUTRONOME %>% distinct()
+
+
+maisvisu1 <- composicaomaisOUTRONOME %>% group_by(`Beneficiario Codigo`,
                                          `Procedimento Codigo.ps`,
            `Beneficiario Nome`,Guia.DataSolicitacao.ps) %>% summarise(
           qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
           valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
 
-maisvisu2 <- composicaomais %>% group_by(`Procedimento Codigo`,
-                                         `Procedimento Nome`) %>% 
-  summarise(qtdetotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-            vlrtotal = sum(Guia.ProcedimentoVlrPagoAjustado),
-            media = vlrtotal/qtdetotal)
+maisvisu2 <- maisvisu1 %>% filter(`Procedimento Codigo.ps` == "10101039")
 
-comparador <- left_join(maisvisu2,servicoscias, by = c(
-  "Procedimento Codigo","Procedimento Nome"))
-
-comparador <- comparador %>% group_by(`Procedimento Codigo`,
-                                      `Procedimento Nome`) %>% summarise(
-                                        qtdetotal = qtdetotal, 
-                                        vlrtotal = vlrtotal,media = media,
-                     Valor.Pagamento.Uberlândia = Valor.Pagamento.Uberlândia,
-                     var = round(media/Valor.Pagamento.Uberlândia-1,4))
-
-# maisvisu1 <- composicaomais %>% filter(dif <= 60 & dif >= 0) %>% group_by(
-#                           `Beneficiario Codigo`, `Beneficiario Nome`,
-#                         `Solicitante Especialidade Principal`, chave.ps, 
-#                     Guia.DataRealizacao.ps,`Procedimento Codigo.ps`) %>%
-#                  summarise(comp.consult = ifelse(sum(dif2) == 1, 
-#                   ifelse(`Procedimento Codigo` == "10101012" | 
-#                          `Procedimento Codigo` == "10101039",
-#                     NA, ifelse(
-#                     Guia.DataRealizacao == Guia.DataRealizacao.ps,
-#                     sum(Guia.ProcedimentoVlrPagoAjustado),NA)),
-#            sum(Guia.ProcedimentoVlrPagoAjustado)),
-#                 qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-#                  valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
-
-#taxas <- baseproduto %>% filter(`Procedimento Nome` == "Taxa Pronto
-#Atendimento")
-#
-#levels(as.factor(taxas$`Credenciado Nome`))
-
-# baseexameespec<- baseproduto %>% filter(`Procedimento Codigo`=="40802051",
-#                                          `Credenciado Nome` != 
-#"Cias Centro Integrado de Atencao A Saude Unimed Uberlandia")
-# 
-# mean(baseexameespec$Guia.ProcedimentoVlrPagoAjustado, na.rm = T)
-
-## SUMIR DA BASE ##
-# porcentagem <- baseREDE %>% filter(`Beneficiario Nome` == "")
-####
-# testando$Guia.DataRealizacao <- as.Date(testando$Guia.DataRealizacao,
-#                                         format = "%d/%m/%Y")
-# 
-# testando2$Guia.DataRealizacao <- as.Date(testando2$Guia.DataRealizacao,
-#                                          format = "%d/%m/%Y")
-# 
-#testandofiltrado <- baseproduto %>% filter( substr(
- # `Procedimento Codigo`,1,2) == "40")
-# levels(as.factor(testandofiltrado$`Procedimento Codigo`))
-
-
-####### ANALISE NOVA ########
-
-# objetivofinal <- baseproduto %>% group_by(`Credenciado Nome`, 
-#                                      `Beneficiario Nome`) %>% summarise(
-#                   cpp = round(sum(Guia.ProcedimentoVlrPagoAjustado)/sum(
-#                         Guia.ProcedimentoQuantAutorizadaAjustado), 4),
-#                    n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado))
-# 
-# objetivofinal2 <- baseREDE %>% group_by(`Credenciado Nome`,
-#                                        `Beneficiario Nome`) %>% summarise(
-#                       cpp = round(sum(
-#Guia.ProcedimentoVlrPagoAjustado)/sum(
-#                        Guia.ProcedimentoQuantAutorizadaAjustado), 4),
-#                      n.proc=sum(Guia.ProcedimentoQuantAutorizadaAjustado))
-
-
-####### ANALISE COMPARATIVA ######
-
-# basealternativa <- left_join(servicoscias,baseREDE,
-#by="Procedimento Codigo")
-# 
-# levels(as.factor(basealternativa$`Beneficiario Nome`))
-# 
-# objetoaltern <- basealternativa %>% count(`Beneficiario Codigo`)
-
-
-
+write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado2.csv")
 
 ############## CIAS ######################
 
 
 baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,`Beneficiario Nome`,
                                `Beneficiario Sexo`,`Credenciado Nome`,
-                              Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
+                           Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
                                `Procedimento Codigo`,`Procedimento Nome`,
                                 Guia.DataRealizacao,Guia.DataSolicitacao,
+                                `Procedimento Classe`,
                                `Solicitante Especialidade Principal`,
                                `Executante Especialidade Principal`,
                                 Guia.ProcedimentoQuantAutorizadaAjustado,
                                 Guia.ProcedimentoVlrPagoAjustado)
 
+baseCIAS <-  inner_join(baseCIAS,
+                        servicoscias,by="Procedimento Codigo")
+
 testando4 <- baseCIAS %>% filter(`Procedimento Codigo` == "10101012")
 
-testando4$chave.ce <- paste(substr(testando4$`Beneficiario Nome`,1,10), 
+testando4$chave.ce <- paste(testando4$`Beneficiario Codigo`, 
                             "#",testando4$Guia.DataSolicitacao)
 
 testando4 <- testando4 %>% select(`Beneficiario Codigo`, 
@@ -487,28 +258,69 @@ composicaocias <- inner_join(baseCIAS,
 gc()
 
 composicaocias$Guia.DataSolicitacao <- if_else(
-  composicaocias$Guia.DataSolicitacao <= composicaocias$Guia.DataRealizacao,
-  composicaocias$Guia.DataSolicitacao,composicaocias$Guia.DataRealizacao)
+composicaocias$Guia.DataSolicitacao <= composicaocias$Guia.DataRealizacao,
+composicaocias$Guia.DataSolicitacao,composicaocias$Guia.DataRealizacao)
 
 composicaocias <- composicaocias %>% distinct()
 
 composicaocias <- composicaocias %>% filter(
   Guia.DataSolicitacao == Guia.DataSolicitacao.ce)
 
+composicaocias12345 <- composicaocias %>% group_by(chave.ce) %>% filter(
+  `Procedimento Codigo.ce` == `Procedimento Codigo`) %>% select(chave.ce)
 
-ciasvisu1 <- composicaocias %>% filter(
+composicaociasOUTRONOME <- left_join(composicaocias12345,composicaocias, 
+                                     by = "chave.ce")
+
+composicaociasOUTRONOME <- composicaociasOUTRONOME %>% distinct()
+
+ciasvisu1 <- composicaociasOUTRONOME %>% filter(
   Guia.DataSolicitacao == Guia.DataSolicitacao.ce) %>% 
   group_by(`Beneficiario Codigo`,`Procedimento Codigo.ce`,
            `Beneficiario Nome`,Guia.DataSolicitacao.ce) %>% summarise(
              qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
              valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
 
-write.csv(maisvisu1, file = "composicaomaiscomespec.csv")
+boxplot(maisvisu1$valortotal)
+par(mfrow = c(1,2))
+
+plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+     main = NULL,
+     xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
+lines(density(maisvisu1$valortotal), col = "sienna1",lwd=2)
+legend("topright", legend=c("CIAS","MAIS"),lty=1, lwd = 2,
+       col=c("darkgreen","sienna1"))
+
+plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+     main = NULL,
+     xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
+lines(density(maisvisu2$valortotal), col = "sienna1",lwd=2)
+legend("topright", legend=c("CIAS","MAIS - PS"),lty=1, lwd = 2,
+       col=c("darkgreen","sienna1"))
+
+write.csv(composicaociasOUTRONOME, file = "composicaociasseparado.csv")
+
+geometric.mean(maisvisu2$valortotal)
+
+#### OUTRAS ABORDAGENS ####
+
+VERIFY <- composicaomaisOUTRONOME %>% filter(
+  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
+                                               `Procedimento Nome`) %>% 
+  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
+      vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(desc(vlr))
 
 
-baseproduto$dif <- as.Date(baseproduto$Guia.DataSolicitacao, 
-                           format = "%d/%m/%Y") - as.Date(
-                             baseproduto$Guia.DataRealizacao,
-                             format = "%d/%m/%Y")
+VERIFY2 <- composicaociasOUTRONOME %>% filter(
+  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
+                                                `Procedimento Nome`) %>% 
+  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
+      vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(desc(vlr))
 
-boxplot(as.numeric(baseproduto$dif))
+VERIFYFINAL <- left_join(VERIFY,VERIFY2, by=c("Procedimento Codigo",
+                                              "Procedimento Nome"),
+                         suffix = c(".MAIS",".CIAS"))
+
+VERIFYFINAL <- VERIFYFINAL %>% mutate(var = qtde.CIAS/qtde.MAIS - 1)
+
+write.csv(VERIFYFINAL, file = "Variações de Exames.csv")
