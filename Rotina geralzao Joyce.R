@@ -163,7 +163,7 @@ baseproduto.proccias <- inner_join(baseproduto,
                                    by="Procedimento Codigo")
 
 baseproduto.proccias <- baseproduto.proccias %>% select(
-                    `Beneficiario Codigo`,
+                     chavecomp,`Beneficiario Codigo`,
                     `Beneficiario Nome`,`Beneficiario Sexo`,
                     `Credenciado Nome`,Guia.OrigemCodigo,
                     `Beneficiario Faixa Etaria`,`Procedimento Codigo`,
@@ -233,7 +233,7 @@ write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado2.csv")
 ############## CIAS ######################
 
 
-baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,
+baseCIAS <- baseCIAS %>% select(chavecomp,`Beneficiario Codigo`,
                                 `Beneficiario Nome`,
                                `Beneficiario Sexo`,`Credenciado Nome`,
                            Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
@@ -304,30 +304,3 @@ legend("topright", legend=c("CIAS","MAIS - PS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
 write.csv(composicaociasOUTRONOME, file = "composicaociasseparado.csv")
-
-geometric.mean(maisvisu2$valortotal)
-
-#### OUTRAS ABORDAGENS ####
-
-VERIFY <- composicaomaisOUTRONOME %>% filter(
-  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                                `Procedimento Nome`) %>% 
-  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
-              desc(vlr))
-
-
-VERIFY2 <- composicaociasOUTRONOME %>% filter(
-  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                                `Procedimento Nome`) %>%
-  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
-              desc(vlr))
-
-VERIFYFINAL <- left_join(VERIFY,VERIFY2, by=c("Procedimento Codigo",
-                                              "Procedimento Nome"),
-                         suffix = c(".MAIS",".CIAS"))
-
-VERIFYFINAL <- VERIFYFINAL %>% mutate(var = qtde.CIAS/qtde.MAIS - 1)
-
-write.csv(VERIFYFINAL, file = "Variações de Exames.csv")
