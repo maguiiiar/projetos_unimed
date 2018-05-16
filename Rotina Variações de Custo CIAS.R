@@ -1,3 +1,11 @@
+require(dplyr)
+require(psych)
+require(readxl)
+require(data.table)
+require(tidyr)
+require(openxlsx)
+require(stringr)
+
 #### OUTRAS ABORDAGENS ####
 
 VERIFY <- composicaomaisOUTRONOME %>% filter(
