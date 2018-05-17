@@ -14,9 +14,11 @@ load("basegeralcomidunifj0512.RData")
 
 dadosfinais <- list.files(pattern = "*.txt") %>% 
   lapply(fread,colClasses = c(`Beneficiario Codigo`="character", 
-                              `Procedimento Codigo`="character"),
+                              `Procedimento Codigo`="character",
+                              Guia.SenhaAutorizacao = "character" ),
          stringsAsFactors=F, encoding="UTF-8",
          select=c("%Competencia","Guia.OrigemCodigo",
+                  "Guia.SenhaAutorizacao",
                   "Guia.DataSolicitacao","Guia.DataRealizacao",
                   "Guia.ProcedimentoQuantAutorizadaAjustado",
                 "Guia.ProcedimentoVlrPagoAjustado","Procedimento Codigo",
@@ -41,8 +43,6 @@ names(cbhpm.cod)[8] = "id"
 cbhpm.cod$id <- as.character(cbhpm.cod$id)
 
 unif = left_join(dadosfinais, cbhpm.cod, by="id")
-
-unif$chavecomp <- rownames(unif)
 
 unif <- unif %>% filter(
   `Executante Especialidade Principal` != "R390-Psiquiatria")
@@ -163,12 +163,12 @@ baseproduto.proccias <- inner_join(baseproduto,
                                    by="Procedimento Codigo")
 
 baseproduto.proccias <- baseproduto.proccias %>% select(
-                     chavecomp,`Beneficiario Codigo`,
+                     Guia.SenhaAutorizacao,`Beneficiario Codigo`,
                     `Beneficiario Nome`,`Beneficiario Sexo`,
                     `Credenciado Nome`,Guia.OrigemCodigo,
                     `Beneficiario Faixa Etaria`,`Procedimento Codigo`,
                     `Procedimento Nome`,Guia.DataRealizacao,
-                    Guia.DataSolicitacao, `Procedimento Classe`,
+                     Guia.DataSolicitacao, `Procedimento Classe`,
                     `Solicitante Especialidade Principal`,
                     `Executante Especialidade Principal`,
                      Guia.ProcedimentoQuantAutorizadaAjustado, 
@@ -223,8 +223,8 @@ composicaomaisOUTRONOME <- composicaomaisOUTRONOME %>% distinct()
 maisvisu1 <- composicaomaisOUTRONOME %>% group_by(`Beneficiario Codigo`,
                                          `Procedimento Codigo.ps`,
            `Beneficiario Nome`,Guia.DataSolicitacao.ps) %>% summarise(
-          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-          valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
+          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado,na.rm = T),
+          valortotal =sum(Guia.ProcedimentoVlrPagoAjustado,na.rm = T))
 
 maisvisu2 <- maisvisu1 %>% filter(`Procedimento Codigo.ps` == "10101039")
 
@@ -233,8 +233,9 @@ write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado2.csv")
 ############## CIAS ######################
 
 
-baseCIAS <- baseCIAS %>% select(chavecomp,`Beneficiario Codigo`,
-                                `Beneficiario Nome`,
+baseCIAS <- baseCIAS %>% select(Guia.SenhaAutorizacao,
+                                `Beneficiario Codigo`,
+                                `Beneficiario Nome`,Guia.OrigemCodigo,
                                `Beneficiario Sexo`,`Credenciado Nome`,
                            Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
                                `Procedimento Codigo`,`Procedimento Nome`,
@@ -289,18 +290,19 @@ ciasvisu1 <- composicaociasOUTRONOME %>% filter(
 boxplot(maisvisu1$valortotal)
 par(mfrow = c(1,2))
 
-plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300), col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
-lines(density(maisvisu1$valortotal), col = "sienna1",lwd=2)
+lines(density(maisvisu1$valortotal, na.rm = T), col = "sienna1",lwd=2)
 legend("topright", legend=c("CIAS","MAIS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
-plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300), col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
-lines(density(maisvisu2$valortotal), col = "sienna1",lwd=2)
+lines(density(maisvisu2$valortotal, na.rm = T), col = "sienna1",lwd=2)
 legend("topright", legend=c("CIAS","MAIS - PS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
 write.csv(composicaociasOUTRONOME, file = "composicaociasseparado.csv")
+write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado.csv")
