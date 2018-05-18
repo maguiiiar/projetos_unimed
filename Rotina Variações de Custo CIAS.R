@@ -111,7 +111,8 @@ objetoCIAS <- baseCIAS %>% filter(`Procedimento Classe` == "SADT") %>%
             cpp.CIAS = round(valor.pago.CIAS/n.proc.CIAS, 4))
 
 servicoscias2 <- read.xlsx("servicoscias.xlsx",sheet = 1, 
-                           startRow = 1, colNames = TRUE,na.strings ="NA")
+                           startRow = 1, colNames = TRUE,
+                           na.strings ="NA")
 
 colnames(servicoscias2)[1] <- "Procedimento Codigo"
 colnames(servicoscias2)[2] <- "Procedimento Nome"
@@ -174,7 +175,10 @@ names(objetototalFINAL)
 objetototalFINAL2 <- objetototalFINAL %>% select(`Procedimento Codigo`,
                                                  `Procedimento Nome`,
                                                  `Credenciado Nome`,
-                                                 cpp.MAIS,cpp.CIAS,
+                                                 n.benef.MAIS,
+                                                 cpp.MAIS,
+                                                 n.benef.CIAS,
+                                                 cpp.CIAS,
                                                  var.CIAS.MAIS)
 
 write.csv(objetototalFINAL2, file = "variacaorealcredenciados.csv")

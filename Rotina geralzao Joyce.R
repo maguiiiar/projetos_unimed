@@ -223,7 +223,8 @@ composicaomaisOUTRONOME <- composicaomaisOUTRONOME %>% distinct()
 maisvisu1 <- composicaomaisOUTRONOME %>% group_by(`Beneficiario Codigo`,
                                          `Procedimento Codigo.ps`,
            `Beneficiario Nome`,Guia.DataSolicitacao.ps) %>% summarise(
-          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado,na.rm = T),
+          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado,
+                         na.rm = T),
           valortotal =sum(Guia.ProcedimentoVlrPagoAjustado,na.rm = T))
 
 maisvisu2 <- maisvisu1 %>% filter(`Procedimento Codigo.ps` == "10101039")
@@ -290,14 +291,16 @@ ciasvisu1 <- composicaociasOUTRONOME %>% filter(
 boxplot(maisvisu1$valortotal)
 par(mfrow = c(1,2))
 
-plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300),
+     col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
 lines(density(maisvisu1$valortotal, na.rm = T), col = "sienna1",lwd=2)
 legend("topright", legend=c("CIAS","MAIS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
-plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300),
+     col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
 lines(density(maisvisu2$valortotal, na.rm = T), col = "sienna1",lwd=2)
