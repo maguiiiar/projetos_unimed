@@ -20,3 +20,17 @@ analise <- demandaesp %>% group_by(cod.atend,n.cartao,cod.proced,
                                    nome.procedimento,
                                    nome.paciente,data) %>%
                           summarise(valor = sum(valor))
+
+demandaesp$chave <- paste(demandaesp$n.cartao,
+                          "#",demandaesp$data)
+
+unif$`%NumeroCartao` <- as.character(unif$`%NumeroCartao`)
+
+unif$Guia.DataRealizacao <- as.Date(unif$Guia.DataRealizacao,
+                                    format = "%d/%m/%Y")
+
+unif$chave <- paste(unif$`%NumeroCartao`,"#",unif$Guia.DataRealizacao)
+
+demandaespontanea <- left_join(demandaesp,unif, by= "chave")
+
+gc()
