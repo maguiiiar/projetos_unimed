@@ -3,26 +3,35 @@ library(dplyr)
 library(readr)
 
 dados.drg.2016.2017 <- fread("Base DRG Brasil 2016 e 2017.csv", sep = ";", h = T, encoding = "UTF-8", 
-                             select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta")) %>% distinct()
+                             select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta"))
 dados.drg.2018 <- fread("20180509001_drgrp_maria.christina.csv", sep = ";", h = T,
-                        select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta")) %>% distinct()
+                        select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta"))
 
                         #select = c("Número da Autorização","Código do Paciente", "Data de Internação", "Data da Alta"))
 dados.drg.2018$`Número da Autorização` = as.character(dados.drg.2018$`Número da Autorização`)
 dados.drg.2018$`Código do Paciente` = as.character(dados.drg.2018$`Código do Paciente`)
 dados.drg = bind_rows(dados.drg.2016.2017, dados.drg.2018); rm(dados.drg.2018, dados.drg.2016.2017)
 
+# base.junho = fread("PrePagamento_201706.txt", encoding = "UTF-8", dec = ",", sep = "|")
+# base.junho$Guia.SenhaAutorizacao = as.character(base.junho$Guia.SenhaAutorizacao)
+
 list_file <- list.files(pattern = "*.txt") %>% 
              lapply(fread, stringsAsFactors=F, encoding = "UTF-8", dec = ",", sep = "|",
                     colClasses = c("Guia.ProcedimentoVlrPago" = "numeric"), 
                     select=c("Competencia","Guia.SenhaAutorizacao","Plano Registro ANS","Guia.ProcedimentoVlrPago","Guia.CustoAssistencialNome","Guia.ClasseNome")) %>% 
-             bind_rows %>% distinct()
-                              
-dados <- list_file %>% filter(substr(Guia.CustoAssistencialNome, 1, 10) == "Internação") %>% group_by(`Competencia`,Guia.SenhaAutorizacao, `Plano Registro ANS`) %>% 
-                       summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE)) %>% distinct
-names(dados)[2] = "Número da Autorização"
-dados$`Número da Autorização` = as.character(dados$`Número da Autorização`)
-dados$Plano = ifelse(dados$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "SCPA 203", "SCPA 204", 
+             bind_rows %>% group_by(`Competencia`, Guia.SenhaAutorizacao, `Plano Registro ANS`) %>% 
+             summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE)) %>% 
+             distinct()
+
+colnames(list_file)[2] = "Número da Autorização"
+list_file$`Número da Autorização` = as.character(list_file$`Número da Autorização`)
+
+# dados <- list_file %>% filter(substr(Guia.CustoAssistencialNome, 1, 10) == "Internação") %>% group_by(`Competencia`,Guia.SenhaAutorizacao, `Plano Registro ANS`) %>% 
+#                        summarise(Valor.Pago = sum(Guia.ProcedimentoVlrPago, na.rm = TRUE)) %>% distinct
+# names(dados)[2] = "Número da Autorização"
+# dados$`Número da Autorização` = as.character(dados$`Número da Autorização`)
+
+list_file$Plano = ifelse(list_file$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "SCPA 203", "SCPA 204", 
                                                        "SCPA 205", "SCPA 206", "SCPA 207", "SCPA 208", 
                                                        "SCPA 331", "Registro ANS 403738993", 
                                                        "Registro ANS 403743990", "Registro ANS 403746994", 
@@ -31,7 +40,7 @@ dados$Plano = ifelse(dados$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "
                                                        "Registro ANS 466179126", "Registro ANS 466185121", 
                                                        "Registro ANS 469670131", "Registro ANS 469671139", 
                                                        "Registro ANS 475122151"), "Individual", 
-                     ifelse(dados$`Plano Registro ANS` %in% c("SCPA 001", "SCPA 002", "SCPA 008", "SCPA 011",
+                     ifelse(list_file$`Plano Registro ANS` %in% c("SCPA 001", "SCPA 002", "SCPA 008", "SCPA 011",
                                                               "SCPA 014", "SCPA 015", "SCPA 016", "SCPA 017", 
                                                               "SCPA 018", "SCPA 019", "SCPA 021", "SCPA 022",
                                                               "SCPA 023", "SCPA 024", "SCPA 025", "SCPA 026",
@@ -56,13 +65,12 @@ dados$Plano = ifelse(dados$`Plano Registro ANS` %in% c("SCPA 201", "SCPA 202", "
                                                               "Registro ANS 473014143", "Registro ANS 475135153", 
                                                               "Registro ANS 476228162", "Registro ANS 478134171"), 
                             "Coletivo", NA))
-table(is.na(dados$Plano))
+list_file <- list_file %>% filter(!is.na(Plano))
 
-dados <- dados %>% group_by(Competencia, "Número da Autorização", Plano, Valor.Pago) %>% distinct()
-
-dados.int.custo = left_join(dados.drg, dados, by = "Número da Autorização")
+dados.int.custo = left_join(dados.drg, list_file, by = "Número da Autorização")
 dados.int.custo = dados.int.custo %>% group_by(`Número da Autorização`, Competencia, `Data de Internação`, `Data da Alta`, `Plano`) %>% summarise(Valor.Pago = sum(Valor.Pago, na.rm=TRUE))
 table(is.na(dados.int.custo$Valor.Pago))
+
 
 # filtro = dados %>% filter(`Número da Autorização` == "156818251")
 
