@@ -34,3 +34,4 @@ unif$chave <- paste(unif$`%NumeroCartao`,"#",unif$Guia.DataRealizacao)
 demandaespontanea <- left_join(demandaesp,unif, by= "chave")
 
 gc()
+  
