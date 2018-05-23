@@ -6,145 +6,65 @@ require(tidyr)
 require(openxlsx)
 require(stringr)
 
-### BASE FINALIZADA ###
-
-load("basegeralcomidunifj0512.RData")
-
 ### TRATAMENTO DE BASES ###
 
-dadosfinais <- list.files(pattern = "*.txt") %>% 
-  lapply(fread,colClasses = c(`Beneficiario Codigo`="character", 
-                              `Procedimento Codigo`="character"),
-         stringsAsFactors=F, encoding="UTF-8",
-         select=c("%Competencia","Guia.OrigemCodigo",
-                  "Guia.DataSolicitacao","Guia.DataRealizacao",
-                  "Guia.ProcedimentoQuantAutorizadaAjustado",
-                "Guia.ProcedimentoVlrPagoAjustado","Procedimento Codigo",
-                  "Procedimento Nome","Procedimento Classe",
-                  "Beneficiario Codigo","Beneficiario Nome",
-                  "Beneficiario Sexo","Beneficiario Faixa Etaria",
-               "Contrato GrupoEmpresa","Contrato Tipo Empresa Detalhado",
-                  "Credenciado Classe","Credenciado Nome",
-                  "Executante Nome","Guia.CustoAssistencialNome",
-                "Executante Especialidade Principal", "Solicitante Nome",
-                  "Solicitante Especialidade Principal")) %>% bind_rows
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-### INCLUINDO CBHPM NOS DADOS
+source("Rotina Beneficiários Gerais.R")
 
-cbhpm.cod <- fread("CBHPM.csv", h=TRUE, sep = ";", na.strings = 
-                     c("","NA"))
+### BASE UNIFICADA COM CBHPM ###
 
-dadosfinais$id <- substr(dadosfinais$`Procedimento Codigo`,1,5)
- 
-names(cbhpm.cod)[8] = "id"
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-cbhpm.cod$id <- as.character(cbhpm.cod$id)
-
-unif = left_join(dadosfinais, cbhpm.cod, by="id")
-
-unif$chavecomp <- rownames(unif)
-
-unif <- unif %>% filter(
-  `Executante Especialidade Principal` != "R390-Psiquiatria")
-
-unif <- unif %>% filter(
-  `Executante Especialidade Principal` != "R730-Psicologia")
+source("Rotina Base Unificada com CBHPM.R")
 
 ### BASE PRODUTO MAIS ###
 
-baseproduto <- unif %>% filter(`Contrato GrupoEmpresa`%in% c(
-  "COLABORADOR MAIS","REAL MOTO PECAS MAIS","UNIMED MAIS",
-  "ALGAR MAIS","FAEPU MAIS","UFU MAIS"))
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-baseproduto <- baseproduto %>% filter(
-  !substr(Guia.CustoAssistencialNome,1,10) == "Internação")
-
-baseproduto$Guia.DataRealizacao <- as.Date(
-  baseproduto$Guia.DataRealizacao,format = "%d/%m/%Y")
-
-baseproduto$Guia.DataSolicitacao <- as.Date(
-  baseproduto$Guia.DataSolicitacao,format = "%d/%m/%Y")
-
-gc()
+source("Rotina Base Produto MAIS.R")
 
 ### BASE SOMENTE CIAS ###
 
-baseCIAS1 <- unif %>% filter(`Credenciado Nome` %in% c(
-  "Cias Centro Integrado de Atencao A Saude Unimed Uberlandia",
-  "Kenia Pereira Vilela")| Guia.OrigemCodigo == 99)
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-
-baseCIAS <- baseCIAS1  %>% filter(
-  Guia.ProcedimentoQuantAutorizadaAjustado != 0 &
-                                  Guia.ProcedimentoVlrPagoAjustado != 0)
-
-baseCIAS$Guia.DataRealizacao <- as.Date(
-  baseCIAS$Guia.DataRealizacao,format = "%d/%m/%Y")
-
-baseCIAS$Guia.DataSolicitacao <- as.Date(
-  baseCIAS$Guia.DataSolicitacao,format = "%d/%m/%Y")
+source("Rotina Base CIAS.R")
 
 ### CARREGANDO BASE DE SERVIÇOS REALIZADOS NO CIAS ###
 
-servicoscias <- read.xlsx("servicosciasalt.xlsx",sheet = 1, 
-                          startRow = 1, colNames = TRUE,na.strings ="NA")
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-colnames(servicoscias)[1] <- "Procedimento Codigo"
-colnames(servicoscias)[2] <- "Nome Proc"
-servicoscias$`Procedimento Codigo` <- as.character(
-  servicoscias$`Procedimento Codigo`)
-
-### ANÁLISE BASE CIAS A NIVEL PROCEDIMENTO ###
-
-baseCIAS$`Procedimento Codigo`<-as.character(
-  baseCIAS$`Procedimento Codigo`)
+source("Rotina Base de Serviços do CIAS.R")
 
 ### CARREGANDO BASES DE MEDICAMENTOS E MATERIAIS ###
 
-load("base.mat.atv.inat.RData")
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-load("base.med.atv.inat.RData")
+source("Rotina Base Med Mat.R")
 
-### TRATANDO BASES DE MEDICAMENTOS E MATERIAIS ###
+### CARREGANDO BASE PARA REDE ###
 
-med.atv.inat$valor <- as.numeric(med.atv.inat$valor)
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
 
-colnames(med.atv.inat)[1] <- "Procedimento Codigo"
-colnames(mat.atv.inat)[1] <- "Procedimento Codigo"
+source("Rotina Base Rede.R")
 
-base.mat <- mat.atv.inat[,c("Procedimento Codigo","valor","versão")]
-base.med <- med.atv.inat[,c("Procedimento Codigo","valor","versão")]
-
-### UNINDO BASE DE MEDICAMENTOS E MATERIAIS
-
-base.med.mat <- bind_rows(mat.atv.inat,med.atv.inat)
-
-### TRATANDO E FILTRANDO BASE DE MEDICAMENTOS E MATERIAIS JA UNIDA ###
-
-base.med.mat$`Procedimento Codigo` <- as.character(
-  base.med.mat$`Procedimento Codigo`)
+### FILTRANDO BASE DE MEDICAMENTOS E MATERIAIS JA UNIDA ###
 
 base.med.mat.cias <- base.med.mat %>% filter(versão == "CIAS")
 
-### TRATANDO BASE PARA REDE ###
+### COMPARAR VALOR TABELADO COM VALOR DA BASE ###
 
-unif$id<-1:nrow(unif) 
-
-baseREDE <- anti_join(unif,baseproduto, by="id")
-
-baseREDE <- baseREDE %>% select(-c(CodCap,CodGrupo,CodSubGrupo,V7))
-
-### TRATANDO E FILTRANDO BASE DE MEDICAMENTOS E MATERIAIS JA UNIDA ###
-
-base.med.mat.rede <- base.med.mat #%>% filter(status == "ativo")
-
-base.med.mat.rede.media <- base.med.mat.rede %>% group_by(
+base.med.mat.rede.media <- base.med.mat %>% group_by(
   `Procedimento Codigo`,nome) %>%
   summarise(valor.geom=round(geometric.mean(valor, na.rm = T),4)
             ,valor.med = round(mean(valor,na.rm = T),4),
             var=round(abs(valor.geom/valor.med-1),4))
 
+### ESTRATIFICANDO EM VARIAS COLUNAS ###
+
 base.med.mat.rede <- spread(base.med.mat.rede, versão, round(valor,4))
+
+### FILTRANDO APENAS CIAS ###
 
 base.med.mat.rede.filt <- base.med.mat.rede %>% filter(
   CIAS != Hospitalar)
@@ -156,19 +76,19 @@ base.med.mat.rede.grp.m <- left_join(base.med.mat.rede,
 base.med.mat.rede <- base.med.mat.rede %>% mutate_if(is.numeric,
                                                       round, digits=4)
 
-######### PRODUTO ########
+######### ANÁLISE PRODUTO MAIS ########
 
 baseproduto.proccias <- inner_join(baseproduto,
                                    servicoscias,
                                    by="Procedimento Codigo")
 
 baseproduto.proccias <- baseproduto.proccias %>% select(
-                    `Beneficiario Codigo`,
+                     Guia.SenhaAutorizacao,`Beneficiario Codigo`,
                     `Beneficiario Nome`,`Beneficiario Sexo`,
                     `Credenciado Nome`,Guia.OrigemCodigo,
                     `Beneficiario Faixa Etaria`,`Procedimento Codigo`,
                     `Procedimento Nome`,Guia.DataRealizacao,
-                    Guia.DataSolicitacao, `Procedimento Classe`,
+                     Guia.DataSolicitacao, `Procedimento Classe`,
                     `Solicitante Especialidade Principal`,
                     `Executante Especialidade Principal`,
                      Guia.ProcedimentoQuantAutorizadaAjustado, 
@@ -223,8 +143,9 @@ composicaomaisOUTRONOME <- composicaomaisOUTRONOME %>% distinct()
 maisvisu1 <- composicaomaisOUTRONOME %>% group_by(`Beneficiario Codigo`,
                                          `Procedimento Codigo.ps`,
            `Beneficiario Nome`,Guia.DataSolicitacao.ps) %>% summarise(
-          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-          valortotal =sum(Guia.ProcedimentoVlrPagoAjustado))
+          qtdtotal = sum(Guia.ProcedimentoQuantAutorizadaAjustado,
+                         na.rm = T),
+          valortotal =sum(Guia.ProcedimentoVlrPagoAjustado,na.rm = T))
 
 maisvisu2 <- maisvisu1 %>% filter(`Procedimento Codigo.ps` == "10101039")
 
@@ -233,8 +154,9 @@ write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado2.csv")
 ############## CIAS ######################
 
 
-baseCIAS <- baseCIAS %>% select(`Beneficiario Codigo`,
-                                `Beneficiario Nome`,
+baseCIAS <- baseCIAS %>% select(Guia.SenhaAutorizacao,
+                                `Beneficiario Codigo`,
+                                `Beneficiario Nome`,Guia.OrigemCodigo,
                                `Beneficiario Sexo`,`Credenciado Nome`,
                            Guia.OrigemCodigo,`Beneficiario Faixa Etaria`,
                                `Procedimento Codigo`,`Procedimento Nome`,
@@ -289,45 +211,21 @@ ciasvisu1 <- composicaociasOUTRONOME %>% filter(
 boxplot(maisvisu1$valortotal)
 par(mfrow = c(1,2))
 
-plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300),
+     col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
-lines(density(maisvisu1$valortotal), col = "sienna1",lwd=2)
+lines(density(maisvisu1$valortotal, na.rm = T), col = "sienna1",lwd=2)
 legend("topright", legend=c("CIAS","MAIS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
-plot(density(ciasvisu1$valortotal),xlim = c(0,300), col = "darkgreen",
+plot(density(ciasvisu1$valortotal, na.rm = T),xlim = c(0,300),
+     col = "darkgreen",
      main = NULL,
      xlab = "Valor Médio de Composição", ylab="Probabilidade",lwd=2)
-lines(density(maisvisu2$valortotal), col = "sienna1",lwd=2)
+lines(density(maisvisu2$valortotal, na.rm = T), col = "sienna1",lwd=2)
 legend("topright", legend=c("CIAS","MAIS - PS"),lty=1, lwd = 2,
        col=c("darkgreen","sienna1"))
 
 write.csv(composicaociasOUTRONOME, file = "composicaociasseparado.csv")
-
-geometric.mean(maisvisu2$valortotal)
-
-#### OUTRAS ABORDAGENS ####
-
-VERIFY <- composicaomaisOUTRONOME %>% filter(
-  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                                `Procedimento Nome`) %>% 
-  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
-              desc(vlr))
-
-
-VERIFY2 <- composicaociasOUTRONOME %>% filter(
-  `Procedimento Classe` == "SADT") %>% group_by(`Procedimento Codigo`,
-                                                `Procedimento Nome`) %>%
-  summarise(qtde = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
-            vlr = sum(Guia.ProcedimentoVlrPagoAjustado)) %>% arrange(
-              desc(vlr))
-
-VERIFYFINAL <- left_join(VERIFY,VERIFY2, by=c("Procedimento Codigo",
-                                              "Procedimento Nome"),
-                         suffix = c(".MAIS",".CIAS"))
-
-VERIFYFINAL <- VERIFYFINAL %>% mutate(var = qtde.CIAS/qtde.MAIS - 1)
-
-write.csv(VERIFYFINAL, file = "Variações de Exames.csv")
+write.csv(composicaomaisOUTRONOME, file = "composicaomaisseparado.csv")
