@@ -35,4 +35,4 @@ table(is.na(demandaespontanea$`%Competencia`))
 soma <- demandaespontanea %>% group_by(Compet.) %>% 
   summarise(n=n(),n.na = sum(is.na(`%Competencia`)), var = n.na/n)
 
-write.csv(demandaespontanea,"uniaodemandaespont.csv")
+  write.csv(demandaespontanea,"uniaodemandaespont.csv")
