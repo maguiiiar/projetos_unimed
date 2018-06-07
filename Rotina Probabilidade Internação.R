@@ -3,12 +3,14 @@ require(dplyr)
 require(caret)
 require(pROC)
 require(ResourceSelection)
-require(memisc)
+#require(memisc)
 require(broom)
 
+teste <- fread("Colaborador_201804.txt", sep = "|", encoding = "UTF-8")
+
 colab <- list.files(pattern = "*.txt") %>% 
-  lapply(fread, stringsAsFactors=F, sep = "|",  select = c("%Competencia", 
-                                                           "%Beneficiario",
+  lapply(fread, stringsAsFactors=F, sep = "|",  select = c("Competencia", 
+                                                           "Beneficiario Codigo",
                                                            "Beneficiario Idade",
                                                            "Beneficiario Faixa Etaria",
                                                            "Guia.SenhaAutorizacao",
@@ -18,7 +20,8 @@ colab <- list.files(pattern = "*.txt") %>%
                                                            "Guia.CustoAssistencialNome",
                                                            "Executante Especialidade Principal",
                                                            "Guia.ProcedimentoVlrPagoAjustado"),
-         colClasses = c("%Competencia" = "character", 
+         colClasses = c("Competencia" = "character", 
+                        "Beneficiario Codigo" = "character",
                         "Procedimento Codigo" = "character",
                         "Beneficiario Idade" = "character",
                         "Guia.ProcedimentoVlrPagoAjustado" = "character"),
@@ -29,11 +32,11 @@ colab$`Beneficiario Idade` = as.numeric(colab$`Beneficiario Idade`)
 colab$Guia.ProcedimentoVlrPagoAjustado = as.numeric(colab$Guia.ProcedimentoVlrPagoAjustado)
 
 benef.inter = colab %>% filter(substr(Guia.CustoAssistencialNome,1,10) == "Internação") %>% 
-                        select(`%Beneficiario`) %>% distinct()
+                        select(`Beneficiario Codigo`) %>% distinct()
 
 benef.inter$target = 1
 
-colab = left_join(colab, benef.inter)
+colab = left_join(colab, benef.inter, by = "Beneficiario Codigo")
 colab$target = ifelse(is.na(colab$target), 0, colab$target)
 
 colab.sem.inter = colab %>% filter(!substr(Guia.CustoAssistencialNome, 1, 10) == "Internação")
@@ -132,3 +135,25 @@ benef.logistic.reg = left_join(colab.sem.inter, benef.trend)
 benef.logistic.reg$trend.perc = ifelse(is.na(benef.logistic.reg$trend.perc), "Misto.70", benef.logistic.reg$trend.perc)
 
 write.csv(benef.logistic.reg, file = "base.regressao.csv")
+
+###############
+
+benef.pato = axis.padrao.geral %>% group_by(`id.benef`, `patologia`) %>% select(`id.benef`, `patologia`) %>% distinct()
+
+###############
+
+#entendendo o comportamento três meses antes do beneficiário ser internado
+
+colab$Guia.DataRealizacao = as.Date(colab$Guia.DataRealizacao, format = "%d/%m/%Y")
+benef.inter.infos = colab %>% filter(substr(Guia.CustoAssistencialNome, 1, 10) == "Internação") %>%
+                    group_by(`Beneficiario Codigo`, Guia.SenhaAutorizacao) %>% summarise(min.data.inter = min(Guia.DataRealizacao))
+colab = left_join(colab, benef.inter.infos, by = "Beneficiario Codigo")
+
+colab.filtered = colab %>% filter(!substr(Guia.CustoAssistencialNome, 1, 10) == "Internação") %>% 
+                           rowwise() %>%
+                           mutate(match = ifelse(between(Guia.DataRealizacao, min.data.inter - 90, min.data.inter - 1), 1, 0)) %>%
+                           ungroup()
+
+colab.filtered = colab.filtered %>% filter(match == 1) %>%
+                                    group_by(`Beneficiario Codigo`, min.data.inter, comp.realizacao = as.numeric(format(as.Date(Guia.DataRealizacao), '%Y%m'))) %>%
+                                    summarise(valor = sum(Guia.ProcedimentoVlrPagoAjustado), n.proc = n())
