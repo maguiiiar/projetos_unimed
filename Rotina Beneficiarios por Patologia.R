@@ -35,3 +35,9 @@ juncao <- left_join(baseviver,unif, by = "%NumeroCartao" )
 juncao2 <- juncao %>% group_by(`%NumeroCartao`,Cliente) %>% summarise(n=n())
 
 qtdenas <- buscapatolo %>% group_by(Patologia) %>% summarise(n=n())
+
+setwd("C:/Users/mrrezende/Documents/ProjetosUnimed/Arquivos (.txt, .csv)")
+
+load("DRG com custo.RData")
+
+names(dados.drg.custo)
