@@ -61,6 +61,8 @@ base_cod$`Beneficiario Codigo` <-
 base_cod$`Beneficiario Codigo.chave` <- NULL
 base_cod$`Beneficiario Codigo.nrocartao` <- NULL
 
+
+
 base_cod <- base_cod %>% filter(!is.na(`Beneficiario Codigo`))
 
 base_ativos <- base_ativos %>% select(`Beneficiario Codigo`)
@@ -96,3 +98,7 @@ base_rec_dyad$NumeroCartao <- NULL
 receita_cardio <- receita_cardio[,c(6,2,3,5,4,1,7)]
 
 receita <- bind_rows(receita_cardio, base_rec_dyad)
+
+receita_FINAL <- inner_join(receita,base_ativos, by="Beneficiario Codigo")
+
+sum(receita$Total)
