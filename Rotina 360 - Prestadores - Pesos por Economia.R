@@ -42,7 +42,7 @@ write.csv(hospitais.custo.qtd, file="Custo e Quantidade.csv")
 ######################
 
 hospitais.desperdicio = dados.drg.custo %>% filter(`Previsto x Realizado` > 0) %>% 
-                                            group_by(`Nome do Hospital`) %>% 
+                                            group_by(`Nome do Hospital`, `Tipo de DRG`) %>% 
                                             summarise(`Total Desperdício` = sum(`Custo Médio Diárias Após`, na.rm = TRUE),
                                                       `Internações Desperdício` = n_distinct(`Número da Autorização`))
 

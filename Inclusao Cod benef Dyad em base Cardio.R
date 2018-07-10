@@ -9,36 +9,26 @@ require(data.table)
 setwd("C:/Users/mrrezende/Documents/")
 
 base_ativos <- fread("benef_ativos_dyad.csv", h=T, sep=";",
-                     encoding = "UTF-8", na.strings = c("-",NA))
+                     encoding = "UTF-8", na.strings = c("-",NA)) #ativos
 
 base_rec_cardio <- fread("receitacardiocpf.txt", h=T, sep = "\t",
-                         na.strings = c("-",NA))
+                         na.strings = c("-",NA), colClasses = c(NumeroCartao = "character")) #receitas cardio
 
 base_rec_dyad <- fread("receitadyadcpf.txt", h=T, sep = "\t", 
-                       na.strings = c("-",NA))
+                       na.strings = c("-",NA), colClasses = c(NumeroCartao = "character", 
+                                                              `Beneficiario Codigo` = "character")) #receitas dyad
 
-base_rec_cardio <- base_rec_cardio %>% select(chave,`CNP`,NumeroCartao)%>%
-                                       distinct()
+base_rec_cardio <- base_rec_cardio %>% select(chave,`CNP`,NumeroCartao) %>% distinct() #selecionando beneficiários distintos
 
-base_rec_dyad <- base_rec_dyad %>% select(chave,`Beneficiario Codigo`,
-                                          `CNP`,NumeroCartao)
-
-base_rec_dyad$`Beneficiario Codigo` <- as.character(
-  base_rec_dyad$`Beneficiario Codigo`)
-
-base_rec_dyad <- base_rec_dyad %>% filter(nchar(NumeroCartao) <= 15)
-base_ativos <- base_ativos %>% filter(nchar(NumeroCartao) <= 15)
-
-base_ativos <- base_ativos %>% filter(str_detect(Contrato.GrupoEmpresa,
-                                                 "MAIS"))
-
-levels(as.factor(base_ativos$`Contrato Tipo Empresa`))
-
-base_ativos <- base_ativos %>% filter(Competencia == 201803)
-
+base_rec_dyad <- base_rec_dyad %>% select(chave,`Beneficiario Codigo`,`CNP`,NumeroCartao) #selecionando beneficiários distintos
+base_rec_dyad <- base_rec_dyad %>% filter(nchar(NumeroCartao) <= 15) #filtrando apenas cartões com no máximo 15 caracteres. existem cartões com C no nome, sendo aqueles que já foram desativados.
 base_rec_dyad <- base_rec_dyad %>% unique(.)
 
-base_rec_cardio$NumeroCartao <- as.character(base_rec_cardio$NumeroCartao)
+base_ativos <- base_ativos %>% filter(nchar(NumeroCartao) <= 15)
+base_ativos <- base_ativos %>% filter(str_detect(Contrato.GrupoEmpresa, "MAIS")) #apenas produto MAIS
+base_ativos <- base_ativos %>% filter(Competencia == 201803)
+
+#levels(as.factor(base_ativos$`Contrato Tipo Empresa`))
 
 base_rec_cardio_nova <- base_rec_cardio %>% filter(!is.na(CNP))
 base_cod <- left_join(base_rec_cardio_nova,base_rec_dyad[,2:3], by="CNP")
@@ -51,28 +41,20 @@ base_cod <- base_cod %>% filter(!is.na(chave))
 base_cod <- left_join(base_cod,base_rec_dyad[,c(1,2)], by="chave",
                       suffix=c("",".chave"))
 
-base_cod$`Beneficiario Codigo` <- 
-  ifelse(is.na(base_cod$`Beneficiario Codigo.nrocartao`),
-         base_cod$`Beneficiario Codigo.chave`,
-         ifelse(is.na(base_cod$`Beneficiario Codigo`),
-                base_cod$`Beneficiario Codigo.nrocartao`,
-                base_cod$`Beneficiario Codigo`))
+base_cod$`Beneficiario Codigo` <- ifelse(is.na(base_cod$`Beneficiario Codigo.nrocartao`),
+                                               base_cod$`Beneficiario Codigo.chave`,
+                                               ifelse(is.na(base_cod$`Beneficiario Codigo`),
+                                                            base_cod$`Beneficiario Codigo.nrocartao`,
+                                                            base_cod$`Beneficiario Codigo`))
 
 base_cod$`Beneficiario Codigo.chave` <- NULL
 base_cod$`Beneficiario Codigo.nrocartao` <- NULL
-
-
 
 base_cod <- base_cod %>% filter(!is.na(`Beneficiario Codigo`))
 
 base_ativos <- base_ativos %>% select(`Beneficiario Codigo`)
 
 base_cod <- inner_join(base_cod,base_ativos, by= c("Beneficiario Codigo"))
-
-base_rec_cardio <- fread("receitacardiocpf.txt", h=T, sep = "\t", 
-                         na.strings = c("-",NA))
-
-base_rec_dyad <- fread("receitadyadcpf.txt", h=T, sep = "\t")
 
 # base_receita_final <- bind_rows(base_cod,base_rec_dyad)
 base_rec_cardio$NumeroCartao <- as.character(base_rec_cardio$NumeroCartao)
@@ -101,4 +83,4 @@ receita <- bind_rows(receita_cardio, base_rec_dyad)
 
 receita_FINAL <- inner_join(receita,base_ativos, by="Beneficiario Codigo")
 
-sum(receita$Total)
+#sum(receita$Total)
