@@ -140,3 +140,5 @@ receita <- bind_rows(receita_cardio, base_rec_dyad)
 receita_FINAL <- inner_join(receita,base_ativos, by="Beneficiario Codigo")
 
 #sum(receita$Total)
+
+write.table(receita_FINAL, "receita_proje.txt", sep = "\t")
