@@ -94,6 +94,8 @@ despesa_cod$`Beneficiario Codigo` <- as.character(
 despesa_cod <- inner_join(despesa_cod,base_ativos, 
                           by= c("Beneficiario Codigo"))
 
+#rodar despesas cardio novamente // parar quando for fazer o select
+
 despesas_cardio <- left_join(despesas_cardio, despesa_cod, 
                              by=c("chave","Cnp","NumeroCartao"))
 
@@ -110,7 +112,7 @@ despesas_cardio <- despesas_cardio %>% group_by(Competencia,
                                               `Beneficiario Codigo`) %>% 
                                             summarise(Total = sum(Valor))
 
-## rodar desp dyad novamente
+## rodar desp dyad novamente // parar quando for fazer o select
 
 names(despesas_dyad)[5] <- "Cnp"
 despesas_dyad$NumeroCartao <- NULL
@@ -119,10 +121,26 @@ despesas_dyad$`Beneficiario Codigo` <- as.character(
 
 despesas_cardio <- despesas_cardio[,c(6,2,4,5,1,7,3)]
 
-colnames(despesas_cardio)[2] <- "Nome Beneficiario"
+colnames(despesas_dyad)[2] <- "Nome Beneficiario"
 colnames(despesas_dyad)[3] <- "Beneficiario.DtNascimento"
 colnames(despesas_dyad)[6] <- "Total"
 
 despesa <- bind_rows(despesas_cardio,despesas_dyad)
 
 despesa_FINAL <- inner_join(despesa,base_ativos, by="Beneficiario Codigo")
+
+write.table(despesa_FINAL, "despesa_proj.txt", sep = "\t")
+
+### VALIDACAO DE DADOS
+
+
+# juntion <- inner_join(despesas_dyad,base_ativos, 
+#                       by= c("Beneficiario Codigo"))
+# 
+# testes_after_atv <- juntion %>% group_by(Competencia) %>% summarise(Total = sum(Total))
+# 
+# testes_bef_atv <- despesas_dyad %>% group_by(Competencia) %>% summarise(Total = sum(Total))
+# 
+# diferencas_ativos <- testes_after_atv$Total - testes_bef_atv$Total
+# 
+# dif <- as.data.frame(cbind(testes_after_atv$Competencia,diferencas_ativos))
