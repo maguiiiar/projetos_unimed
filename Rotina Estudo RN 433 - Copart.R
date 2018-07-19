@@ -14,11 +14,20 @@ copart$Copart = ifelse(is.na(copart$`Coparticipação`), copart$Coparticipacao, 
 #x = copart %>% filter(!is.na(Coparticipacao) & !is.na(`Coparticipação`))
 
 x = copart %>% filter(Copart > Mensalidade)
-y = copart %>% filter(Copart > Mensalidade) %>% group_by(variable) %>% summarise(n = n_distinct(Copart), copart = sum(Copart, na.rm = TRUE))
-z = copart %>% group_by(variable) %>% summarise(n = n_distinct(Copart), copart = sum(Copart, na.rm = TRUE))
+y = copart %>% filter(Copart > Mensalidade) %>% group_by(variable) %>% summarise(n.copart = n_distinct(Copart), 
+                                                                                 valor.copart = sum(Copart, na.rm = TRUE),
+                                                                                 n.mensa = n_distinct(Mensalidade),
+                                                                                 valor.mensa = sum(Mensalidade, na.rm = TRUE))
+z = copart %>% group_by(variable) %>% summarise(n.copart = n_distinct(Copart), 
+                                                n.mensa = n_distinct(Mensalidade),
+                                                valor.copart = sum(Copart, na.rm = TRUE),
+                                                valor.mensa = sum(Mensalidade, na.rm = TRUE))
 
 w = left_join(y, z, by = "variable", suffix = c(".filtro", ".geral"))
-w = w %>% mutate(`n.prop (%)` = (n.filtro/n.geral)*100, `valor.prop (%)` = (copart.filtro/copart.geral)*100)
+w = w %>% mutate(`n.prop.copart (%)` = (n.copart.filtro/n.copart.geral)*100, 
+                 `valor.prop.copart (%)` = (valor.copart.filtro/valor.copart.geral)*100,
+                 `n.prop.mensa (%)` = (n.copart.filtro/n.mensa.geral)*100,
+                 `valor.prop.mensa (%)` = (valor.copart.filtro/valor.mensa.geral)*100)
 
 copart.big <- sum(x$Copart, na.rm = TRUE) #2.267.335
 copart.total <- sum(copart$Copart, na.rm = TRUE) #17.467.280
