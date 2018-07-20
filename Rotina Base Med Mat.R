@@ -1,6 +1,6 @@
 ### CARREGANDO BASES DE MEDICAMENTOS E MATERIAIS ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed/Arquivos (.txt, .csv)")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)")
 
 load("base.mat.atv.inat.RData")
 
