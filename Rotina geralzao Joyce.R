@@ -8,43 +8,43 @@ require(stringr)
 
 ### TRATAMENTO DE BASES ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Beneficiários Gerais.R")
 
 ### BASE UNIFICADA COM CBHPM ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base Unificada com CBHPM.R")
 
 ### BASE PRODUTO MAIS ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base Produto MAIS.R")
 
 ### BASE SOMENTE CIAS ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base CIAS.R")
 
 ### CARREGANDO BASE DE SERVIÇOS REALIZADOS NO CIAS ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base de Serviços do CIAS.R")
 
 ### CARREGANDO BASES DE MEDICAMENTOS E MATERIAIS ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base Med Mat.R")
 
 ### CARREGANDO BASE PARA REDE ###
 
-setwd("C:/Users/mrrezende/Documents/ProjetosUnimed")
+setwd("C:/ProjetosUnimed")
 
 source("Rotina Base Rede.R")
 
