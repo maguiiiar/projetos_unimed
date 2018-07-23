@@ -41,3 +41,7 @@ setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R")
 load("DRG com custo.RData")
 
 names(dados.drg.custo)
+
+dados.drg.custo <- dados.drg.custo %>% select("Identificador do Paciente",
+                                              "Código do Paciente",
+                                              "Nome do Paciente")
