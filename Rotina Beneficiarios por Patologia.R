@@ -8,8 +8,6 @@ require(stringr)
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Planilhas Espaço Viver Bem")
 
-testes 
-
 benefppato <- read.xlsx("Beneficiarios por patologia.xlsx",sheet = 1, 
                            startRow = 1, colNames = TRUE,na.strings ="NA")
 
