@@ -11,9 +11,7 @@ require(stringr)
 # benefppato <- read.xlsx("Beneficiarios por patologia.xlsx",sheet = 1, 
                            # startRow = 1, colNames = TRUE,na.strings ="NA")
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
-      Planilhas Espaço Viver Bem/2018/
-      Estratificação mensal - Desospitalização 2018")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Planilhas Espaço Viver Bem/2018/Estratificação mensal - Desospitalização 2018")
 
 baseviver <- read.xlsx(
   "FOR EVB 080 - Estratificação Mensal Desospitalização -Janeiro.xlsx",
@@ -77,6 +75,9 @@ dados.drg.custo2$TempoInter <- dados.drg.custo2$`Data da Alta`- dados.drg.custo2
 
 dados.drg.custo2$TempoInter <- as.numeric(dados.drg.custo2$TempoInter)
 
+dados.drg.custo2$TempoInter <- dados.drg.custo2$TempoInter+1
+dados.drg.custo2$`Custo Total (R$)` <- dados.drg.custo2$`Custo Total (R$)`+1
+
 dados.drg.custo3 <- dados.drg.custo2 %>% group_by(Sexo,
                                         `Situação da Internação`,
                                         `CID Principal`) %>% summarise(
@@ -84,3 +85,6 @@ dados.drg.custo3 <- dados.drg.custo2 %>% group_by(Sexo,
                                          TempoInter, na.rm = T),
                                          CustoMedio = geometric.mean(
                                          `Custo Total (R$)`,na.rm = T))
+
+dados.drg.custo3$TempoMedio <- dados.drg.custo3$TempoMedio-1
+dados.drg.custo3$CustoMedio <- dados.drg.custo3$CustoMedio-1
