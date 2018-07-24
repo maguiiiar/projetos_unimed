@@ -6,10 +6,10 @@ require(tidyr)
 require(openxlsx)
 require(stringr)
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Planilhas Espaço Viver Bem")
+#setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Planilhas Espaço Viver Bem")
 
-benefppato <- read.xlsx("Beneficiarios por patologia.xlsx",sheet = 1, 
-                           startRow = 1, colNames = TRUE,na.strings ="NA")
+# benefppato <- read.xlsx("Beneficiarios por patologia.xlsx",sheet = 1, 
+                           # startRow = 1, colNames = TRUE,na.strings ="NA")
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
       Planilhas Espaço Viver Bem/2018/
@@ -20,27 +20,27 @@ baseviver <- read.xlsx(
   sheet = 1,startRow = 5,rows = c(6:90), colNames = TRUE,na.strings ="NA")
 
 baseviver <- baseviver %>% filter(Motivo.da.Saída != "Obito")
-10
+
 baseviver$Nº <- NULL
 
 baseviver$Código.do.beneficiário <- as.character(
   baseviver$Código.do.beneficiário)
 
-benefppato$Inscrição.Beneficiário <- as.character(
-  benefppato$Inscrição.Beneficiário)
+# benefppato$Inscrição.Beneficiário <- as.character(
+#   benefppato$Inscrição.Beneficiário)
+# 
+# colnames(benefppato)[3] <- "Código.do.beneficiário"
+# 
+# buscapatolo <- left_join(baseviver,benefppato,by="Código.do.beneficiário")
 
-colnames(benefppato)[3] <- "Código.do.beneficiário"
+# colnames(baseviver)[2] <- "%NumeroCartao"
 
-buscapatolo <- left_join(baseviver,benefppato,by="Código.do.beneficiário")
-
-colnames(baseviver)[2] <- "%NumeroCartao"
-
-juncao <- left_join(baseviver,unif, by = "%NumeroCartao" )
-
-juncao2 <- juncao %>% group_by(`%NumeroCartao`,Cliente) %>% summarise(
-  n=n())
-
-qtdenas <- buscapatolo %>% group_by(Patologia) %>% summarise(n=n())
+# juncao <- left_join(baseviver,unif, by = "%NumeroCartao" )
+# 
+# juncao2 <- juncao %>% group_by(`%NumeroCartao`,Cliente) %>% summarise(
+#   n=n())
+# 
+# qtdenas <- buscapatolo %>% group_by(Patologia) %>% summarise(n=n())
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R")
 
@@ -72,3 +72,15 @@ dados.drg.custo2$`Data de Internação` <- as.Date(
 
 dados.drg.custo2$`Data da Alta` <- as.Date(
   dados.drg.custo2$`Data da Alta`,"%d/%m/%Y")
+
+dados.drg.custo2$TempoInter <- dados.drg.custo2$`Data da Alta`- dados.drg.custo2$`Data de Internação`
+
+dados.drg.custo2$TempoInter <- as.numeric(dados.drg.custo2$TempoInter)
+
+dados.drg.custo3 <- dados.drg.custo2 %>% group_by(Sexo,
+                                        `Situação da Internação`,
+                                        `CID Principal`) %>% summarise(
+                                         TempoMedio = geometric.mean(
+                                         TempoInter, na.rm = T),
+                                         CustoMedio = geometric.mean(
+                                         `Custo Total (R$)`,na.rm = T))
