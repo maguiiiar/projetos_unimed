@@ -119,25 +119,25 @@ vlrs.drg <- vlrs.drg %>% filter(`CID Principal` == c(""))
 
 write.file(vlrs.drg,file = "valoresDRG.txt", sep = ";")
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
-      Planilhas Espaço Viver Bem")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Planilhas Espaço Viver Bem")
 
 dados.viverbem <- fread("Pacientes Internação Domiciliar.csv",sep = ";")
 
 dados.viverbem <- dados.viverbem %>% select(Nome,Sexo,`Codigo Usuário`,
-                                            `dif dias`,Empresa,`CID 10`,
-                                            `Patologia Principal`)
+                                            `dif dias`,`Custo Hospitalar`,
+                                           `CID 10`,`Patologia Principal`)
 
-dados.viverbem$Empresa <- as.numeric(dados.viverbem$Empresa)
+dados.viverbem$Empresa <- as.numeric(dados.viverbem$`Custo Hospitalar`)
 
 dados.viverbem2 <- dados.viverbem %>% group_by(Sexo,
                                                `CID 10`) %>% summarise(
                                               TempoMedio = geometric.mean(
                                               `dif dias`, na.rm = T),
                                               CustoMedio = geometric.mean(
-                                                Empresa, na.rm = T),
+                                                `Custo Hospitalar`,
+                                                na.rm = T),
                                               DiariaMedia = 
-                                                sum(Empresa)/sum(
-                                                  `dif dias`))
+                                                sum(`Custo Hospitalar`)/
+                                                sum(`dif dias`))
 
 write.file(dados.viverbem2, file = "valoresEVB.txt",sep = ";")
