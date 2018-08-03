@@ -24,3 +24,8 @@ jaatendidos <- tomadadecisao2 %>% group_by(`Credenciado Classe`) %>%
   summarise(qtde_benef = n_distinct(`Beneficiario Codigo`))
 
 fwrite(tomadadecisao, file = "BaseTomadaDeDecisão.csv", sep = "\t")
+
+
+teste <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases Prob. Internacao/PrePagamento_201803.txt", sep = "|")
+
+teste$`Beneficiario Codigo` <- as.character(teste$`Beneficiario Codigo`)
