@@ -3,17 +3,27 @@ require(data.table)
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Joyce/")
 
-colab012018 <- fread("Colaborador_201801.txt",sep = "|",header = T)
-colab022018 <- fread("Colaborador_201802.txt",sep = "|",header = T)
-colab032018 <- fread("Colaborador_201803.txt",sep = "|",header = T)
-colab042018 <- fread("Colaborador_201804.txt",sep = "|",header = T)
-colab052018 <- fread("Colaborador_201805.txt",sep = "|",header = T)
+colab012018 <- fread("Colaborador_201801.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+colab022018 <- fread("Colaborador_201802.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+colab032018 <- fread("Colaborador_201803.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+colab042018 <- fread("Colaborador_201804.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+colab052018 <- fread("Colaborador_201805.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
 
-prepg012018 <- fread("PrePagamento_201801.txt",sep = "|",header = T)
-prepg022018 <- fread("PrePagamento_201802.txt",sep = "|",header = T)
-prepg032018 <- fread("PrePagamento_201803.txt",sep = "|",header = T)
-prepg042018 <- fread("PrePagamento_201804.txt",sep = "|",header = T)
-prepg052018 <- fread("PrePagamento_201805.txt",sep = "|",header = T)
+prepg012018 <- fread("PrePagamento_201801.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+prepg022018 <- fread("PrePagamento_201802.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+prepg032018 <- fread("PrePagamento_201803.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+prepg042018 <- fread("PrePagamento_201804.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
+prepg052018 <- fread("PrePagamento_201805.txt",sep = "|",header = T,
+                     colClasses = c(`Beneficiario Codigo` = "character"))
 
 colab012018 <- colab012018 %>% select(-Guia.ProcedimentoClasseDyad)
 colab022018 <- colab022018 %>% select(-Guia.ProcedimentoClasseDyad)
@@ -27,7 +37,7 @@ prepg032018 <- prepg032018 %>% select(-Guia.ProcedimentoClasseDyad)
 prepg042018 <- prepg042018 %>% select(-Guia.ProcedimentoClasseDyad)
 prepg052018 <- prepg052018 %>% select(-Guia.ProcedimentoClasseDyad)
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases Prob. Internacao/")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases Prob. Risco/")
 
 fwrite(colab012018, file = "Colaborador_201801.txt",sep = "|")
 fwrite(colab022018, file = "Colaborador_201802.txt",sep = "|")
