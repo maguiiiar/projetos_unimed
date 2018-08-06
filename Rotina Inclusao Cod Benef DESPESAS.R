@@ -4,7 +4,7 @@ require(stringr)
 require(caret)
 require(data.table)
 
-setwd("C:/Users/mrrezende/Documents/")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Benef Ativos/")
 
 base_ativos <- fread("benef_ativos_dyad.csv", h=T, sep=";",
                      encoding = "UTF-8", na.strings = c("-",NA)) #ativos
@@ -12,12 +12,13 @@ base_ativos <- fread("benef_ativos_dyad.csv", h=T, sep=";",
 #para usar esta base, rodar tudo que esta relacionado a ela no script de
 #inclusao do cod benef da receita
 
-setwd("C:/Users/mrrezende/Documents/despesas por benef/")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base despesas para projecao/")
 
 ### despesas do dyad com tratamento da base
 
 despesas_dyad <- fread("desp_dyad_fim.txt", h=T, sep="\t",
-                     encoding = "UTF-8", na.strings = c("-",NA)) 
+                     encoding = "UTF-8", na.strings = c("-",NA),
+                     colClasses = c(`Beneficiario Codigo` = "character")) 
 
 despesas_dyad <- despesas_dyad %>% select(-Competencia,-`Tipo Dependente`)
 
@@ -128,7 +129,7 @@ despesas_cardio$IdPessoa <- NULL
 
 ### agrupa-se as despesas para somar o valor
 
-despesas_cardio <- despesas_cardio %>% group_by(Competencia,
+despesa_cod <- despesa_cod %>% group_by(Competencia,
                                               `Nome Beneficiario`,chave,
                                               Beneficiario.DtNascimento,
                                               Cnp,
