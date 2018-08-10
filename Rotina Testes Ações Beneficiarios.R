@@ -19,13 +19,22 @@ colnames(basesn)[1] <- "Beneficiario Codigo"
 tomadadecisao <- anti_join(basesn,baserecursos, by = "Beneficiario Codigo")
 ### QUEM DEVE SER ACIONADO ###
 
-tomadadecisao2 <- inner_join(basesn,baserecursos, by = "Beneficiario Codigo")
+tomadadecisao2 <- semi_join(basesn,baserecursos, by = "Beneficiario Codigo")
 ### QUEM ESTA DENTRO DE PROGRAMAS DE RECURSOS PROPRIOS ###
+### SEMI JOIN POIS NAO DUPLICA AS INFORMACOES SOBRE A CLASSE DO CREDENC.
 
-jaatendidos <- tomadadecisao2 %>% group_by(`Credenciado Classe`) %>% 
-  summarise(qtde_benef = n_distinct(`Beneficiario Codigo`))
+tomadadecisao3 <- inner_join(basesn,baserecursos, by = "Beneficiario Codigo")
 
-fwrite(tomadadecisao, file = "BaseTomadaDeDecisão.txt", sep = "\t")
+jaatendidos <- tomadadecisao3 %>% group_by(`Credenciado Classe`) %>% 
+  summarise(qtde_benef = n_distinct(`Beneficiario Codigo`)) 
+
+jaatendidos$contador <- nrow(tomadadecisao3)
+
+jaatendidos$prop <- jaatendidos$qtde_benef/jaatendidos$contador
+
+setwd("C:/Users/mrrezende/Documents/")
+
+fwrite(tomadadecisao, file = "BaseTomadaDeDecisão.txt", sep = ";")
 
 ################################ TESTE BASES ####################
 
