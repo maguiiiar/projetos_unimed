@@ -2,6 +2,8 @@ require(data.table)
 require(dplyr)
 require(caret)
 
+setwd("C:/Users/mrrezende/Documents/")
+
 baserecursos <- fread("C:/Users/mrrezende/Documents/Base RP.csv",sep = ",",
                       colClasses = c(`?Beneficiario Codigo` = "character"))
 

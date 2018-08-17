@@ -28,19 +28,22 @@ despesas <- list.files(pattern = "*.txt") %>%
                               FctEvento.QtdUtilizacaoAjustado),
                               valor = sum(FctCusto.VlrTotalAjustado))
 
-despesas$chave <- paste0(substr(despesas$NomeBeneficiario,1,13),
-                            despesas$DtNascimento, collapse = "#")
+despesas$chave <- paste0(substr(despesas$NomeBeneficiario,1,13),"#",
+                            despesas$DtNascimento)
 
-save(despesas, file = "despesas.cardio.RData")
-load(file = "despesas.cardio.RData")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
 
-teste <- despesas %>% filter(TipoEmpresa == "Colaborador")
+save(despesas, file = "despesas_cardio.RData")
+
+load(file = "despesas_cardio.RData",envir = despesas.cardio)
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases Prob. Risco/")
 
 despesas.dyad <- list.files(pattern = "*.txt") %>% 
   lapply(fread,colClasses = c(`Beneficiario Codigo`="character", 
                     `Competencia`="character",
+                    `Beneficiario CNP` = "character",
+                    `%NumeroCartao` = "character",
                     `Guia.ProcedimentoQuantAutorizadaAjustado` = "numeric",
                     `Guia.ProcedimentoVlrPagoAjustado` = "numeric"),
          stringsAsFactors=F, encoding="UTF-8", sep = "|",
@@ -51,12 +54,31 @@ despesas.dyad <- list.files(pattern = "*.txt") %>%
                   "Guia.ProcedimentoVlrPagoAjustado","%NumeroCartao",
                   "Competencia","Beneficiario Nome","Beneficiario CNP",
                   "Contrato Tipo Empresa",
-                  "Beneficiario Data Nascimento"))  %>% bind_rows %>% 
+                  "Beneficiario Data Nascimento")) 
+
+despesas.dyad.teste <- despesas.dyad  %>% bind_rows %>% 
   group_by(Competencia,`Beneficiario Nome`,`Beneficiario CNP`,
            `Beneficiario Codigo`,`%NumeroCartao`,
            `Beneficiario Data Nascimento`,`Contrato Tipo Empresa`) %>%
   summarise(qtde_util = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
     valor = sum(Guia.ProcedimentoVlrPagoAjustado))
 
-dep.1 <- fread("Colaborador_201705.txt", sep = "|", h=T)
-
+# dep.1 <- fread("Colaborador_201705.txt", sep = "|", h=T)
+# 
+# class(dep.1$Guia.ProcedimentoQuantAutorizadaAjustado)
+# 
+# dep.1$Guia.ProcedimentoQuantAutorizadaAjustado <- as.numeric(dep.1$Guia.ProcedimentoQuantAutorizadaAjustado)
+# 
+# class(dep.1$Guia.ProcedimentoVlrPagoAjustado)
+# 
+# dep.1$Guia.ProcedimentoVlrPagoAjustado <- as.numeric(dep.1$Guia.ProcedimentoVlrPagoAjustado)
+# 
+# dep.2 <- fread("Colaborador_201706.txt", sep = "|", h=T)
+# 
+# class(dep.2$Guia.ProcedimentoQuantAutorizadaAjustado)
+# 
+# dep.2$Guia.ProcedimentoQuantAutorizadaAjustado <- as.numeric(dep.2$Guia.ProcedimentoQuantAutorizadaAjustado)
+# 
+# class(dep.2$Guia.ProcedimentoVlrPagoAjustado)
+# 
+# dep.2$Guia.ProcedimentoVlrPagoAjustado <- as.numeric(dep.2$Guia.ProcedimentoVlrPagoAjustado)
