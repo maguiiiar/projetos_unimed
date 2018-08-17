@@ -10,6 +10,7 @@ despesas <- list.files(pattern = "*.txt") %>%
   lapply(fread,colClasses = c(`IdPessoa`="character", 
                               `CodBeneficiario`="character",
                               `Competencia` = "character",
+                              `Cnp` = "character",
                               `FctEvento.QtdUtilizacaoAjustado`="numeric",
                               `FctCusto.VlrTotalAjustado` = "numeric"),
          stringsAsFactors=F, encoding="UTF-8", sep = "|",
@@ -19,18 +20,19 @@ despesas <- list.files(pattern = "*.txt") %>%
                   "FctCusto.VlrTotalAjustado",
                   "CodBeneficiario","NomeBeneficiario","Cnp",
                   "IdPessoa","DtNascimento","TipoEmpresa",
-                  "GrupoEmpresa"))  %>% bind_rows #%>% 
- 
-desp.cardio <- despesas %>% group_by(Competencia,CodBeneficiario,Cnp,
+                  "GrupoEmpresa"))  %>% bind_rows %>%
+                            group_by(Competencia,CodBeneficiario,Cnp,
                                      NomeBeneficiario,IdPessoa,
                                      DtNascimento,TipoEmpresa) %>% 
                             summarise(qtde_util = sum(
                               FctEvento.QtdUtilizacaoAjustado),
                               valor = sum(FctCusto.VlrTotalAjustado))
 
+despesas$chave <- paste0(substr(despesas$NomeBeneficiario,1,13),
+                            despesas$DtNascimento, collapse = "#")
 
-desp.cardio$chave <- paste0(substr(desp.cardio$NomeBeneficiario,1,13),
-                            desp.cardio$DtNascimento, collapse = "#")
+save(despesas, file = "despesas.cardio.RData")
+load(file = "despesas.cardio.RData")
 
 teste <- despesas %>% filter(TipoEmpresa == "Colaborador")
 
