@@ -35,7 +35,9 @@ setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
 
 save(despesas, file = "despesas_cardio.RData")
 
-load(file = "despesas_cardio.RData",envir = despesas.cardio)
+load(file = "despesas_cardio.RData")
+
+colnames(despesas)[2] <- "NumeroCartao"
 
 despesas_cardio <- despesas %>% ungroup() %>% select(CodBeneficiario,
                                                  Cnp,chave) %>% unique(.)
@@ -59,7 +61,8 @@ despesas.dyad <- list.files(pattern = "*.txt") %>%
                          `Beneficiario CNP` = "character",
                          `%NumeroCartao` = "character",
                     `Guia.ProcedimentoQuantAutorizadaAjustado` ="numeric",
-                         `Guia.ProcedimentoVlrPagoAjustado` = "numeric"))
+                         `Guia.ProcedimentoVlrPagoAjustado` = "numeric"),
+         na.strings=c("","NA"))
 
 despesas.dyad[[2]]$Guia.ProcedimentoQuantAutorizadaAjustado <- as.numeric(
   despesas.dyad[[2]]$Guia.ProcedimentoQuantAutorizadaAjustado)
@@ -140,13 +143,17 @@ despesas_dyad <- despesas.dyad.group %>% ungroup() %>% select(
 
 colnames(despesas_dyad)[2] <- "Cnp"
 
+despesas_dyad <- despesas_dyad %>% filter(!chave == "#")
+
+despesas_dyad <- despesas_dyad %>% filter(nchar(NumeroCartao) <= 15)
+
 despesas_union <- left_join(despesas_cardio,despesas_dyad[,c(1,3)], 
                          by = "NumeroCartao")
 
 despesas_union <- left_join(despesas_union,despesas_dyad[,c(3,4)],
                           by="chave", suffix=c("",".chave"))
 
-despesas_union  <- despesas_union %>% filter(!is.na(Cnp))
+despesas_union  <- despesas_union %>% filter(!Cnp == "")
 despesas_union <- left_join(despesas_union,despesas_dyad[,c(2,3)], 
                             by="Cnp",suffix=c("",".cpf"))
 
@@ -168,3 +175,29 @@ colnames(despesas_union)[4] <- "Beneficiario Codigo"
 
 despesas_union <- despesas_union %>% filter(
   !is.na(`Beneficiario Codigo`)) 
+
+despesas_union <- despesas_union %>% select(-NumeroCartao) %>% distinct()
+
+############################# TESTES ####################
+
+despesas_cardio_final <- left_join(despesas, despesas_union, 
+                             by=c("chave","Cnp","NumeroCartao"))
+
+despesas_cardio_final <- despesas_cardio_final %>% filter(
+                                            !is.na(`Beneficiario Codigo`))
+
+despesas_cardio_final$IdPessoa <- NULL
+
+despesas.dyad.group <- despesas.dyad.group %>% filter(chave != "#")
+
+despesas_cardio_final <- despesas_cardio_final[,c(1,4,3,10,2,5,6,7,8,9)]
+
+colnames(despesas_cardio_final)[2] <- "Beneficiario Nome"
+colnames(despesas_cardio_final)[3] <- "Beneficiario CNP"
+colnames(despesas_cardio_final)[6] <- "Beneficiario Data Nascimento"
+colnames(despesas_cardio_final)[7] <- "Contrato Tipo Empresa"
+
+despesas.final <- bind_rows(despesas_cardio_final, despesas.dyad.group)
+
+despesas.final <- despesas.final %>% filter(!is.na(valor))
+
