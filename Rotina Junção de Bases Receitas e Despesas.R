@@ -171,6 +171,22 @@ names(despesas)
 
 colnames(despesas.dyad.group)[5] <- "NumeroCartao"
 
+### RETIRA REGISTROS SEM INFORMAÇÕES DE BENEFICIÁRIO
+
+despesas.dyad.group <- despesas.dyad.group %>% filter(chave != "#")
+
+### MUDANDO DIRETORIO PARA SALVAR BASE EM .RDATA
+
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
+
+### SALVANDO BASE
+
+save(despesas.dyad.group, file = "despesas_dyad.agrupada.RData")
+
+### CARREGANDO BASE JÁ PRONTA
+
+load(file = "despesas_dyad.agrupada.RData")
+
 ### SELECIONANDO APENAS COLUNAS NECESSÁRIAS
 
 despesas_dyad <- despesas.dyad.group %>% ungroup() %>% select(
@@ -238,10 +254,6 @@ despesas_cardio_final <- despesas_cardio_final %>% filter(!is.na(
                                               `Beneficiario Codigo`)) %>%
                                                 select(-IdPessoa)
 
-### RETIRA REGISTROS SEM INFORMAÇÕES DE BENEFICIÁRIO
-
-despesas.dyad.group <- despesas.dyad.group %>% filter(chave != "#")
-
 ### REORGANIZANDO AS COLUNAS PARA FAZER A JUNÇÃO | MUDA NOMES DE COLUNAS
 
 despesas_cardio_final <- despesas_cardio_final[,c(1,4,3,10,2,5,6,7,8,9)]
@@ -258,3 +270,21 @@ despesas.final <- bind_rows(despesas_cardio_final, despesas.dyad.group)
 ### RETIRA QUEM NÃO POSSUI VALOR DA BASE
 
 despesas.final <- despesas.final %>% filter(!is.na(valor))
+
+### MUDANDO DIRETORIO PARA SALVAR BASE EM .RDATA
+
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
+
+### SALVANDO BASE
+
+save(despesas.final, file = "despesas_final.RData")
+
+### CARREGANDO BASE JÁ PRONTA
+
+load(file = "despesas_final.RData")
+
+#### EXPORTANDO BASE PARA O KNIME
+
+setwd("C:/Users/mrrezende/Documents/")
+
+fwrite(despesas.final, file = "base_despesas.txt", sep = ";")
