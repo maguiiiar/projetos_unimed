@@ -288,3 +288,32 @@ load(file = "despesas_final.RData")
 setwd("C:/Users/mrrezende/Documents/")
 
 fwrite(despesas.final, file = "base_despesas.txt", sep = ";")
+
+
+
+######################## RECEITAS ###########################
+
+receitas_cardio <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/Cardio_Receita_2015.txt", sep = "|")
+
+
+receitas_cardio <- list.files(pattern = "*.txt") %>% 
+  lapply(fread,colClasses = c(`IdPessoa`="character", 
+                              `CodBeneficiario`="character",
+                              `Competencia` = "character",
+                              `Cnp` = "character",
+                              `FctEvento.QtdUtilizacaoAjustado`="numeric",
+                              `FctCusto.VlrTotalAjustado` = "numeric"),
+         stringsAsFactors=F, encoding="UTF-8", sep = "|",
+         select=c("Competencia","Evento.DtAbEvento",
+                  "ClasseTratamentoAjustada",
+                  "FctEvento.QtdUtilizacaoAjustado",
+                  "FctCusto.VlrTotalAjustado",
+                  "CodBeneficiario","NomeBeneficiario","Cnp",
+                  "IdPessoa","DtNascimento","TipoEmpresa",
+                  "GrupoEmpresa"))  %>% bind_rows %>%
+  group_by(Competencia,CodBeneficiario,Cnp,
+           NomeBeneficiario,IdPessoa,
+           DtNascimento,TipoEmpresa) %>% 
+  summarise(qtde_util = sum(
+    FctEvento.QtdUtilizacaoAjustado),
+    valor = sum(FctCusto.VlrTotalAjustado))
