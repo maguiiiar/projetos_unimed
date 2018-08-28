@@ -197,7 +197,7 @@ despesas_dyad <- despesas.dyad.group %>% ungroup() %>% select(
 
 colnames(despesas_dyad)[2] <- "Cnp"
 
-### RETIRANDO QUEM SÓ POSSUI RECEITA SEM QUALQUER CÓDIGO
+### RETIRANDO QUEM SÓ POSSUI DESPESA SEM QUALQUER CÓDIGO
 
 despesas_dyad <- despesas_dyad %>% filter(!chave == "#")
 
@@ -289,60 +289,62 @@ setwd("C:/Users/mrrezende/Documents/")
 
 fwrite(despesas.final, file = "base_despesas.txt", sep = ";")
 
-
-
 ######################## RECEITAS ###########################
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/receitas/")
-
-receitas_cardio <- list.files(pattern = "*.txt") %>% 
-  lapply(fread,colClasses = c(`Competencia` = "character",
-                              `IdBeneficiario` = "character",
-                              `IdModuloBeneficiario` = "character"),
-         stringsAsFactors=F, encoding="UTF-8", sep = "|",
-         select=c("Competencia","FctReceitas.DscTipo",
-                  "FctReceitas.VlrMensDesc",
-                  "IdBeneficiario",
-                  "IdModuloBeneficiario"))  %>% bind_rows #%>%
-  # group_by(Competencia,CodBeneficiario,Cnp,
-  #          NomeBeneficiario,IdPessoa,
-  #          DtNascimento,TipoEmpresa) %>% 
-  # summarise(qtde_util = sum(
-  #   FctEvento.QtdUtilizacaoAjustado),
-  #   valor = sum(FctCusto.VlrTotalAjustado))
-
-receitas_cardio$FctReceitas.VlrMensDesc <- str_replace_all(
-  receitas_cardio$FctReceitas.VlrMensDesc , ",","\\.")
-
-
-head(receitas_cardio)
-
-class(receitas_cardio$FctReceitas.VlrMensDesc)
-
-receitas_cardio$FctReceitas.VlrMensDesc <- as.numeric(
-  receitas_cardio$FctReceitas.VlrMensDesc)
-
-receitas_cardio <- receitas_cardio %>% group_by(Competencia,
-                                               #IdModuloBeneficiario,
-                                               IdBeneficiario) %>% 
-                                      summarise(receita = 
-                                            sum(FctReceitas.VlrMensDesc))
-
-dados_receitas_benef <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/Cardio_Beneficiarios.txt", 
-                              encoding = "UTF-8", 
-                              colClasses = c(`CNP` = "character", 
-                                          `IdBeneficiario` = "character",
-                                         `CodBeneficiario` = "character"))
-
-receitas.final <- left_join(receitas_cardio,dados_receitas_benef,
-                            by = "IdBeneficiario")
+# setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
+#       receitas/")
+# 
+# receitas_cardio <- list.files(pattern = "*.txt") %>% 
+#   lapply(fread,colClasses = c(`Competencia` = "character",
+#                               `IdBeneficiario` = "character",
+#                               `IdModuloBeneficiario` = "character"),
+#          stringsAsFactors=F, encoding="UTF-8", sep = "|",
+#          select=c("Competencia","FctReceitas.DscTipo",
+#                   "FctReceitas.VlrMensDesc",
+#                   "IdBeneficiario",
+#                   "IdModuloBeneficiario"))  %>% bind_rows #%>%
+#   # group_by(Competencia,CodBeneficiario,Cnp,
+#   #          NomeBeneficiario,IdPessoa,
+#   #          DtNascimento,TipoEmpresa) %>% 
+#   # summarise(qtde_util = sum(
+#   #   FctEvento.QtdUtilizacaoAjustado),
+#   #   valor = sum(FctCusto.VlrTotalAjustado))
+# 
+# receitas_cardio$FctReceitas.VlrMensDesc <- str_replace_all(
+#   receitas_cardio$FctReceitas.VlrMensDesc , ",","\\.")
+# 
+# 
+# head(receitas_cardio)
+# 
+# class(receitas_cardio$FctReceitas.VlrMensDesc)
+# 
+# receitas_cardio$FctReceitas.VlrMensDesc <- as.numeric(
+#   receitas_cardio$FctReceitas.VlrMensDesc)
+# 
+# receitas_cardio <- receitas_cardio %>% group_by(Competencia,
+#                                                #IdModuloBeneficiario,
+#                                                IdBeneficiario) %>% 
+#                                       summarise(receita = 
+#                                           sum(FctReceitas.VlrMensDesc))
+# 
+# dados_receitas_benef <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+#                               Base Receitas GERAL/
+#                               Cardio_Beneficiarios.txt", 
+#                               encoding = "UTF-8", 
+#                               colClasses = c(`CNP` = "character", 
+#                                         `IdBeneficiario` = "character",
+#                                       `CodBeneficiario` = "character"))
+# 
+# receitas.final <- left_join(receitas_cardio,dados_receitas_benef,
+#                             by = "IdBeneficiario")
 
 ########## TESTES ###########################
 
-# setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/impostos/")
+# setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
+#       impostos/")
 # 
-# test <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/receitas/Cardio_Receita_2015.txt")
-# 
+# test <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+#Base Receitas GERAL/receitas/Cardio_Receita_2015.txt",encoding = "UTF-8")
 # 
 # test$FctReceitas.VlrMensDesc <- str_replace_all(
 #   test$FctReceitas.VlrMensDesc , ",","\\.")
@@ -350,25 +352,21 @@ receitas.final <- left_join(receitas_cardio,dados_receitas_benef,
 # test$FctReceitas.VlrMensDesc <- as.numeric(
 #   test$FctReceitas.VlrMensDesc)
 # 
+# teste <- test %>% group_by(Competencia, IdBeneficiario) %>% summarise(
+#   receita = sum(round(FctReceitas.VlrMensDesc,4),na.rm = T))
+# 
+# test$
+# 
 # test$FctReceitas.VlrMensalidade <- str_replace_all(
 #   test$FctReceitas.VlrMensalidade , ",","\\.")
 # 
 # test$FctReceitas.VlrMensalidade <- as.numeric(
 #   test$FctReceitas.VlrMensalidade)
 # 
-# teste <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/impostos/Cardio_Impostos_2015.txt")
-# 
-# teste2 <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/adicionais/Cardio_Adicionais_2015.txt")
-# 
-# teste3 <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/complementos_adicionais/Cardio_ComplementoAdicionais_2015.txt")
-# 
-# 
-# test$FctReceitas.VlrDesconto <- str_replace_all(
-#   test$FctReceitas.VlrDesconto , ",","\\.")
-# 
-# test$FctReceitas.VlrDesconto <- as.numeric(test$FctReceitas.VlrDesconto)
-# 
-# sum(test$FctReceitas.VlrDesconto)
+# teste2 <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+#                 Base Receitas GERAL/adicionais/
+#                 Cardio_Adicionais_2015.txt", encoding = "UTF-8", 
+#                 colClasses = c(IdBeneficiario = "character"))
 # 
 # teste2$FctAdicionais.TotalAdicionais <- str_replace_all(
 #   teste2$FctAdicionais.TotalAdicionais, ",","\\.")
@@ -376,21 +374,81 @@ receitas.final <- left_join(receitas_cardio,dados_receitas_benef,
 # teste2$FctAdicionais.TotalAdicionais <- as.numeric(
 #   teste2$FctAdicionais.TotalAdicionais)
 # 
-# sum(teste2$FctAdicionais.TotalAdicionais)
+# teste2 <- teste2 %>% group_by(Competencia,IdBeneficiario) %>% summarise(
+#   total_adicionais = sum(round(FctAdicionais.TotalAdicionais,4),
+#                          na.rm = T))
 # 
-# teste3$ComplementoAdicionais.Seritu <- str_replace_all(teste3$ComplementoAdicionais.Seritu, ",","\\.")
-# teste3$ComplementoAdicionais.DescontoReembolso <- str_replace_all(teste3$ComplementoAdicionais.DescontoReembolso, ",","\\.")
-# teste3$ComplementoAdicionais.Repasse <- str_replace_all(teste3$ComplementoAdicionais.Repasse, ",","\\.")
-# teste3$ComplementoAdicionais.Comissao <- str_replace_all(teste3$ComplementoAdicionais.Comissao, ",","\\.")
+# teste3 <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+#                 Base Receitas GERAL/complementos_adicionais/
+#                 Cardio_ComplementoAdicionais_2015.txt", 
+#                 encoding = "UTF-8", 
+#                 colClasses = c(IdBeneficiario = "character"))
 # 
-# teste3$ComplementoAdicionais.Seritu <- as.numeric(teste3$ComplementoAdicionais.Seritu)
-# teste3$ComplementoAdicionais.DescontoReembolso <- as.numeric(teste3$ComplementoAdicionais.DescontoReembolso)
-# teste3$ComplementoAdicionais.Repasse <- as.numeric(teste3$ComplementoAdicionais.Repasse)
-# teste3$ComplementoAdicionais.Comissao <- as.numeric(teste3$ComplementoAdicionais.Comissao)
-# gc()
+# teste3$ComplementoAdicionais.Comissao <- str_replace_all(
+#   teste3$ComplementoAdicionais.Comissao, ",","\\.")
 # 
-# sum(teste3$ComplementoAdicionais.Comissao)
-# sum(teste3$ComplementoAdicionais.DescontoReembolso)
-# sum(teste3$ComplementoAdicionais.Repasse)
-# sum(teste3$ComplementoAdicionais.Seritu)
+# teste3$ComplementoAdicionais.Comissao <- as.numeric(
+#   teste3$ComplementoAdicionais.Comissao)
 # 
+# teste3$ComplementoAdicionais.DescontoReembolso <- str_replace_all(
+#   teste3$ComplementoAdicionais.DescontoReembolso, ",","\\.")
+# 
+# teste3$ComplementoAdicionais.DescontoReembolso <- as.numeric(
+#   teste3$ComplementoAdicionais.DescontoReembolso)
+# 
+# teste3$ComplementoAdicionais.Repasse <- str_replace_all(
+#   teste3$ComplementoAdicionais.Repasse, ",","\\.")
+# 
+# teste3$ComplementoAdicionais.Repasse <- as.numeric(
+#   teste3$ComplementoAdicionais.Repasse)
+# 
+# teste3$ComplementoAdicionais.Seritu <- str_replace_all(
+#   teste3$ComplementoAdicionais.Seritu, ",","\\.")
+# 
+# teste3$ComplementoAdicionais.Seritu <- as.numeric(
+#   teste3$ComplementoAdicionais.Seritu)
+# 
+# teste3 <- teste3 %>% group_by(Competencia,IdBeneficiario) %>% summarise(
+#   total_complem_adic = round(
+#     sum(ComplementoAdicionais.Comissao,na.rm = T) + sum(
+#       ComplementoAdicionais.DescontoReembolso,na.rm = T) + sum(
+#         ComplementoAdicionais.Repasse,na.rm = T) + sum(
+#           ComplementoAdicionais.Seritu,na.rm = T),4))
+# 
+# teste.final <- left_join(teste, teste2)
+# 
+# teste.final <- left_join(teste.final, teste3)
+# 
+# teste.final$total_adicionais <- ifelse(is.na(teste.final$
+#                                                total_adicionais),
+#                                        0, teste.final$total_adicionais)
+# 
+# teste.final$total_complem_adic <- ifelse(is.na(teste.final$
+#                                                  total_complem_adic),
+#                                      0, teste.final$total_complem_adic)
+# 
+# teste.final <- teste.final %>% group_by(Competencia,
+#                                         IdBeneficiario) %>% summarise(
+#                                           receita.total = 
+#                                             round(sum(receita) - 
+#                                             sum(total_adicionais) - 
+#                                             sum(total_complem_adic),2))
+# 
+# lista_beneficiarios <- dados_receitas_benef %>% select(
+#   -AutoNumber_Beneficiario,-CodContrato,-NumeroContrato,-NomeContrato,
+#   -NumeroEmpresa,-CodFamilia) %>% filter(!is.na(Idade) & 
+#                                        TipoEmpresa == c("Pré Pagamento",
+#                                                   "Colaborador")) %>% 
+#                                                             distinct()
+# 
+# dados.totais <- left_join(teste.final,lista_beneficiarios,
+#                           by = "IdBeneficiario")
+# 
+# dados.totais <- dados.totais %>% filter(!is.na(IdPessoa))
+
+# test$FctReceitas.VlrDesconto <- str_replace_all(
+#   test$FctReceitas.VlrDesconto , ",","\\.")
+# 
+# test$FctReceitas.VlrDesconto <- as.numeric(test$FctReceitas.VlrDesconto)
+# 
+# sum(test$FctReceitas.VlrDesconto)
