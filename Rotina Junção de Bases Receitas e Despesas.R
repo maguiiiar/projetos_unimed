@@ -364,7 +364,8 @@ receitas_adc_cardio <- receitas_adc_cardio %>% group_by(Competencia,
 ### RODANDO NOVAMENTE A BASE DE BENEFICIARIOS PARA VINCULAR AOS VALORES
 
 dados_receitas_benef <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
-                              Base Receitas GERAL/Cardio_Beneficiarios.txt",
+                              Base Receitas GERAL/
+                              Cardio_Beneficiarios.txt",
                               encoding = "UTF-8",
                               colClasses = c(`CNP` = "character",
                                          `IdBeneficiario` = "character",
@@ -383,6 +384,15 @@ receitas.adc <- receitas.adc %>% select(-AutoNumber_Beneficiario,
                                         -NumeroContrato) %>% filter(
         TipoEmpresa %in% c("Pré Pagamento", "Colaborador")) %>% distinct()
 
+receitas.adc <- receitas.adc %>% filter(!Competencia %in% c("201705",
+                                                            "201706",
+                                                            "201707",
+                                                            "201708",
+                                                            "201709",
+                                                            "201710",
+                                                            "201711",
+                                                            "201712"))
+
 ### TESTANDO SE OS VALORES BATEM COM O QLIKVIEW
 
 pross <- receitas.adc %>% group_by(Competencia) %>% 
@@ -400,5 +410,31 @@ save(receitas.adc, file = "receitas_adc.RData")
 
 load(file = "receitas_adc.RData")
 
-#### PRÓXIMO PASSO JUNTAR AS BASES DE RECEITAS E CALCULAR VALOR FINAL
+#### JUNÇÃO DAS BASES DE RECEITAS E CÁLCULO DO VALOR FINAL
 
+receitas.final <- left_join(receitas.vlrdesc,receitas.adc)
+
+receitas.final <- receitas.final %>% mutate(
+  total_complem_adic = ifelse(is.na(total_complem_adic),0,
+                              total_complem_adic)) %>% mutate(
+                                receita = ifelse(is.na(receita),0,
+                                          receita)) %>% group_by_all() %>%
+  summarise(Vlr.Receita = sum(receita) + sum(total_complem_adic)) %>% 
+   ungroup %>% select(-total_complem_adic,-receita,-Sexo,-IdBeneficiario,
+                      -GrupoEmpresa,-Idade)
+
+### CRIANDO CHAVE COM NOME E DATA DE NASCIMENTO
+
+receitas.final$chave <- paste0(substr(
+  receitas.final$NomeBeneficiario,1,13),"#",
+  receitas.final$Beneficiario.DtNascimento)
+
+### FALTA JUNTAR COM DYAD E CRIAR COD BENEFICIARIO PARA BASE CARDIO
+
+
+
+#### EXPORTANDO BASE PARA O KNIME
+
+setwd("C:/Users/mrrezende/Documents/")
+
+fwrite(receitas.final, file = "base_receitas.txt", sep = ";")
