@@ -429,9 +429,60 @@ receitas.final$chave <- paste0(substr(
   receitas.final$NomeBeneficiario,1,13),"#",
   receitas.final$Beneficiario.DtNascimento)
 
+### MUDANÇA DE DIRETÓRIO PARA BUSCAR VALORES DO DYAD
+
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
+      Receitas_Dyad/")
+
 ### FALTA JUNTAR COM DYAD E CRIAR COD BENEFICIARIO PARA BASE CARDIO
 
+receita.dyad <- list.files(pattern = "*.txt") %>%
+  lapply(fread,colClasses = c(`Competencia` = "character",
+                              `Beneficiario Codigo` = "character"),
+         stringsAsFactors=F, encoding="UTF-8", sep = "|",
+         select=c("Receita.PedidoVlrLiquido","Competencia",
+                  "Beneficiario Codigo","Beneficiario Nome",
+                  "Beneficiario CNP","Beneficiario Data Nascimento",
+                "Beneficiario Sexo","Beneficiario Idade",
+                "Contrato GrupoEmpresa",
+                "Contrato Tipo Empresa"))  %>% bind_rows
 
+### MUDANDO DE PONTO PARA VIRGULA NA COLUNA DE VALORES E TRANSF EM NUMERO
+
+receita.dyad$Receita.PedidoVlrLiquido <-str_replace_all(
+  receita.dyad$Receita.PedidoVlrLiquido, ",","\\.")
+
+receita.dyad$Receita.PedidoVlrLiquido<- as.numeric(
+  receita.dyad$Receita.PedidoVlrLiquido)
+
+### SOMA DE VALORES
+
+receitas.dyad <- receita.dyad %>% group_by_all() %>% summarise(
+                       Valor = sum(Receita.PedidoVlrLiquido)) %>%
+filter(`Contrato Tipo Empresa` %in% c("Pré Pagamento", "Colaborador")) %>%
+  filter(!is.na(`Beneficiario Idade`)) %>% distinct()
+
+receitas.dyad <- receitas.dyad %>% ungroup() %>% select(
+  -Receita.PedidoVlrLiquido)
+
+### TRATANDO A COLUNA CPF PARA SE TER UMA OUTRA CHAVE CONSISTENTE
+
+receitas.dyad$`Beneficiario CNP` <- str_replace_all(
+  receitas.dyad$`Beneficiario CNP`,"\\.","")
+
+receitas.dyad$`Beneficiario CNP` <- str_replace_all(
+  receitas.dyad$`Beneficiario CNP`,"-","")
+
+### COLOCANDO O NOME DO BENEFICIÁRIO EM MAIÚSCULO
+
+receitas.dyad$`Beneficiario Nome` = toupper(
+  receitas.dyad$`Beneficiario Nome`)
+
+### CRIANDO CHAVE COM NOME E DATA DE NASCIMENTO
+
+receitas.dyad$chave <- paste0(substr(
+  receitas.dyad$`Beneficiario Nome`,1,13),"#",
+  receitas.dyad$`Beneficiario Data Nascimento`)
 
 #### EXPORTANDO BASE PARA O KNIME
 
