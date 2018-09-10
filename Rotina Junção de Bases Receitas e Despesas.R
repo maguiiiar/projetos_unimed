@@ -4,6 +4,8 @@ require(stringr)
 require(caret)
 require(data.table)
 
+############## DESPESAS ###################
+
 ### MUDANDO DIRETÓRIO PARA DESPESAS DO CARDIO
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Despesas GERAL/")
@@ -412,9 +414,9 @@ load(file = "receitas_adc.RData")
 
 #### JUNÇÃO DAS BASES DE RECEITAS E CÁLCULO DO VALOR FINAL
 
-receitas.final <- left_join(receitas.vlrdesc,receitas.adc)
+receitas.cardio <- left_join(receitas.vlrdesc,receitas.adc)
 
-receitas.final <- receitas.final %>% mutate(
+receitas.cardio <- receitas.cardio %>% mutate(
   total_complem_adic = ifelse(is.na(total_complem_adic),0,
                               total_complem_adic)) %>% mutate(
                                 receita = ifelse(is.na(receita),0,
@@ -425,22 +427,22 @@ receitas.final <- receitas.final %>% mutate(
 
 ### CRIANDO CHAVE COM NOME E DATA DE NASCIMENTO
 
-receitas.final$chave <- paste0(substr(
-  receitas.final$NomeBeneficiario,1,13),"#",
-  receitas.final$Beneficiario.DtNascimento)
+receitas.cardio$chave <- paste0(substr(
+  receitas.cardio$NomeBeneficiario,1,13),"#",
+  receitas.cardio$Beneficiario.DtNascimento)
 
 ### MUDANÇA DE DIRETÓRIO PARA BUSCAR VALORES DO DYAD
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
       Receitas_Dyad/")
 
-### FALTA JUNTAR COM DYAD E CRIAR COD BENEFICIARIO PARA BASE CARDIO
+### LENDO BASE DO DYAD
 
 receita.dyad <- list.files(pattern = "*.txt") %>%
   lapply(fread,colClasses = c(`Competencia` = "character",
                               `Beneficiario Codigo` = "character"),
          stringsAsFactors=F, encoding="UTF-8", sep = "|",
-         select=c("Receita.PedidoVlrLiquido","Competencia",
+         select=c("Receita.PedidoVlrLiquido","Competencia","NumeroCartao",
                   "Beneficiario Codigo","Beneficiario Nome",
                   "Beneficiario CNP","Beneficiario Data Nascimento",
                 "Beneficiario Sexo","Beneficiario Idade",
@@ -484,8 +486,98 @@ receitas.dyad$chave <- paste0(substr(
   receitas.dyad$`Beneficiario Nome`,1,13),"#",
   receitas.dyad$`Beneficiario Data Nascimento`)
 
-#### EXPORTANDO BASE PARA O KNIME
+### RETIRADA DE COLUNAS
 
-setwd("C:/Users/mrrezende/Documents/")
+receitas.cardio.selec <- receitas.cardio %>% ungroup() %>% select(
+                                CodBeneficiario,CNP,chave) %>% unique(.)
 
-fwrite(receitas.final, file = "base_receitas.txt", sep = ";")
+receitas.cardio.selec <- receitas.cardio.selec %>% filter(
+                                          !chave == "#01/04/1998")
+
+receitas.cardio.selec <- rename(
+           receitas.cardio.selec, "NumeroCartao" = "CodBeneficiario")
+
+### RETIRADA DE COLUNAS
+
+receitas.dyad.selec <- receitas.dyad %>% ungroup() %>% select(
+  `NumeroCartao`,`Beneficiario CNP`,`Beneficiario Codigo`,
+  chave) %>% unique(.)
+
+### MUDANDO NOME EM COLUNA DA BASE
+
+colnames(receitas.dyad.selec)[2] <- "CNP"
+
+### RETIRANDO QUEM SÓ POSSUI DESPESA SEM QUALQUER CÓDIGO
+
+receitas.dyad.selec <- receitas.dyad.selec %>% filter(!chave == "#")
+
+### TRATANDO COLUNA DO CARTÃO PARA MAIS UMA COLUNA CONSISTENTE
+
+receitas.dyad.selec <- receitas.dyad.selec %>% filter(
+  nchar(NumeroCartao) <= 15)
+
+### INCLUSÃO DE CHAVES PARA ENCONTRAR OS CODIGOS DE BENEFICIARIO NO CARDIO
+
+receitas_union <- left_join(despesas_cardio,receitas.dyad.selec[,c(1,3)], 
+                            by = "NumeroCartao")
+
+receitas_union <- left_join(receitas_union,receitas.dyad.selec[,c(3,4)],
+                            by="chave", suffix=c("",".chave"))
+
+receitas_union  <- receitas_union %>% filter(!Cnp == "")
+receitas_union <- left_join(receitas_union,receitas.dyad.selec[,c(2,3)], 
+                            by="CNP",suffix=c("",".cpf"))
+
+### TIRANDO REGISTROS DUPLICADOS
+
+receitas_union <- receitas_union %>% distinct()
+
+### UNIFICANDO OS CODIGOS EM APENAS UMA COLUNA
+
+receitas_union$`Beneficiario Codigo` <- ifelse(is.na(
+  receitas_union$`Beneficiario Codigo`),
+  receitas_union$`Beneficiario Codigo.chave`,
+  ifelse(is.na(receitas_union$`Beneficiario Codigo.cpf`),
+         receitas_union$`Beneficiario Codigo`,
+         receitas_union$`Beneficiario Codigo.cpf`))
+
+receitas_union$`Beneficiario Codigo.chave` <- NULL
+receitas_union$`Beneficiario Codigo` <- NULL
+
+### MUDANDO NOME EM COLUNA DA BASE
+
+colnames(receitas_union)[4] <- "Beneficiario Codigo"
+
+### LIMPA QUEM NAO FOI ENCONTRADO COM CODIGO BENEFICIARIO
+
+receitas_union <- receitas_union %>% filter(
+  !is.na(`Beneficiario Codigo`))
+
+### COLOCANDO OS CÓDIGOS NA BASE COM TODAS AS COLUNAS DO CARDIO
+
+receitas_cardio_final <- left_join(receitas.cardio, receitas_union, 
+                                   by=c("chave","Cnp","NumeroCartao"))
+
+### RETIRANDO BENEFICIARIOS QUE NÃO POSSUEM CODIGO DO DYAD
+### TAMBÉM RETIRA UMA COLUNA DA BASE
+
+receitas_cardio_final <- receitas_cardio_final %>% filter(!is.na(
+  `Beneficiario Codigo`)) %>%
+  select(-IdPessoa)
+
+### REORGANIZANDO AS COLUNAS PARA FAZER A JUNÇÃO | MUDA NOMES DE COLUNAS
+
+receitas_cardio_final <- receitas_cardio_final[,c(1,4,3,2,5,6,7,8,9)]
+
+colnames(receitas_cardio_final)[2] <- "Beneficiario Nome"
+colnames(receitas_cardio_final)[3] <- "Beneficiario CNP"
+colnames(receitas_cardio_final)[6] <- "Beneficiario Data Nascimento"
+colnames(receitas_cardio_final)[7] <- "Contrato Tipo Empresa"
+
+### JUNÇÃO DE BASES DO CARDIO E DO DYAD
+
+receitas.final <- bind_rows(receitas_cardio_final, receitas.dyad)
+
+### RETIRA QUEM NÃO POSSUI VALOR DA BASE
+
+receitas.final <- receitas.final %>% filter(!is.na(valor))
