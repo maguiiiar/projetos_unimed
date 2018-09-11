@@ -5,23 +5,25 @@ require(dplyr)
 #Junção DRG x Custo#
 ####################
 
-dados.drg <- fread("DRG - 201701u a 201807 - COM UTI + CONDIÇÃO ADQ.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("", NA))
+dados.drg <- fread("DRG - 201701 a 201807 - COM UTI + CONDIÇÃO ADQ.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("", NA))
 dados.drg$`Condição Adquirida` <- ifelse(is.na(dados.drg$`Código da Condição Adquirida 1`), "NÃO", "SIM")
-dados.drg.uti <- fread("DRG CUSTO - 201701 a 201806 - COM UTI.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("", NA))
+# dados.drg.uti <- fread("DRG CUSTO - 201701 a 201806 - COM UTI.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("", NA))
 
-custo.drg <- fread("DRG CUSTO - 201701 a 201806 - COM UTI.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("-", NA))
-custo.drg.uti <-  fread("DRG CUSTO UTI - 201701 a 201806.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("-", NA))
+custo.drg <- fread("DRG - 201701 a 201807 - CUSTO.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("-", NA))
+# custo.drg.uti <-  fread("DRG CUSTO UTI - 201701 a 201806.txt", sep = ";", header = TRUE, dec = ",", na.strings = c("-", NA))
 
 colnames(custo.drg)[colnames(custo.drg)=="Codigo do Registro de Paciente"] <- "Identificador do Paciente"
-colnames(custo.drg.uti)[colnames(custo.drg.uti)=="Codigo do Registro de Paciente"] <- "Identificador do Paciente"
+# colnames(custo.drg.uti)[colnames(custo.drg.uti)=="Codigo do Registro de Paciente"] <- "Identificador do Paciente"
 
 custo.drg <- custo.drg %>% select(`Identificador do Paciente`, `Valor Total do Custo`)
-custo.drg.uti <- custo.drg.uti %>% select(`Identificador do Paciente`, `Valor Total do Custo`)
+# custo.drg.uti <- custo.drg.uti %>% select(`Identificador do Paciente`, `Valor Total do Custo`)
 
 dados.drg <- left_join(dados.drg, custo.drg, by = "Identificador do Paciente"); rm(custo.drg)
-dados.drg.uti <- left_join(dados.drg.uti, custo.drg.uti, by = "Identificador do Paciente"); rm(custo.drg.uti)
+# dados.drg.uti <- left_join(dados.drg.uti, custo.drg.uti, by = "Identificador do Paciente"); rm(custo.drg.uti)
 
-write.csv(dados.drg, file = "DRG com CUSTO - 201701 a 201806.csv", row.names = FALSE)
+dados.drg.com.custo <- dados.drg %>% filter(!is.na(`Valor Total do Custo`))
+
+write.csv(dados.drg, file = "BASE DRG 201701 a 201807 - COM CUSTO.csv", row.names = FALSE, na = "")
 
 # dados.drg$Percentil = as.character(dados.drg$Percentil)
 # dados.drg$`Código do Paciente` = as.character(dados.drg$`Código do Paciente`)
