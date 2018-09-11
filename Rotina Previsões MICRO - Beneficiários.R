@@ -52,5 +52,5 @@ load("receitaprev.RData")
 
 setwd("C:/Users/mrrezende/Documents/")
 
-fwrite(kplusdesp, file = "despesaprevisao", sep = ";")
-fwrite(kplusrece, file = "receitaprevisao", sep = ";")
+fwrite(kplusdesp, file = "despesaprevisao.txt", sep = ";")
+fwrite(kplusrece, file = "receitaprevisao.txt", sep = ";")
