@@ -4,8 +4,8 @@ require(stringr)
 require(caret)
 require(data.table)
 
-ativos <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Benef Ativos/
-                ivos_201805.tab",
+ativos <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+                Base Benef Ativos/ativos_201805.tab",
                 colClasses = c(`Beneficiario Codigo` = "character"), 
                 encoding = "UTF-8")
 
@@ -27,6 +27,10 @@ kmeans <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/kmeans.txt",
 kmeans <- kmeans %>% select(`Beneficiario Codigo`,Cluster)
 
 kplusdesp <- left_join(despe.ativos,kmeans, by = "Beneficiario Codigo")
+
+
+CLUSTER5 <- kplusdesp %>% filter(is.na(Cluster))
+
 
 kplusrece <- left_join(recei.ativos,kmeans, by = "Beneficiario Codigo")
 
