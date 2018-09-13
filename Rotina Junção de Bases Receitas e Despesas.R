@@ -57,7 +57,7 @@ colnames(despesas)[2] <- "NumeroCartao"
 
 ### SELECIONANDO APENAS COLUNAS PARA INCLUIR COD BENEFICIARIO DO DYAD
 
-despesas_cardio <- despesas %>% ungroup() %>% select(CodBeneficiario,
+despesas_cardio <- despesas %>% ungroup() %>% select(NumeroCartao,
                                                  Cnp,chave) %>% unique(.)
 
 ### MUDANDO NOME EM COLUNA DA BASE
