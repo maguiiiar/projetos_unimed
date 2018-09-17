@@ -28,17 +28,18 @@ kmeans <- kmeans %>% select(`Beneficiario Codigo`,Cluster)
 
 kplusdesp <- left_join(despe.ativos,kmeans, by = "Beneficiario Codigo")
 
-
-CLUSTER5 <- kplusdesp %>% filter(is.na(Cluster))
-
-
-kplusrece <- left_join(recei.ativos,kmeans, by = "Beneficiario Codigo")
-
 kplusdesp <- kplusdesp %>% group_by(Competencia, Cluster) %>% summarise(
   n_benef = n_distinct(`Beneficiario Codigo`), valor = sum(valor))
 
-kplusrece <- kplusrece %>% group_by(Competencia, Cluster) %>% summarise(
+serie.ativos <- recei.ativos %>%  group_by(Competencia) %>% summarise(
   n_benef = n_distinct(`Beneficiario Codigo`), valor = sum(Valor))
+
+# CLUSTER5 <- kplusdesp %>% filter(is.na(Cluster))
+
+# kplusrece <- left_join(recei.ativos,kmeans, by = "Beneficiario Codigo")
+
+# kplusrece <- kplusrece %>% group_by(Competencia, Cluster) %>% summarise(
+  # n_benef = n_distinct(`Beneficiario Codigo`), valor = sum(Valor))
 
 ### MUDANDO DIRETORIO PARA SALVAR BASE EM .RDATA
 
@@ -47,7 +48,7 @@ setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
 ### SALVANDO BASE
 
 save(kplusdesp, file = "despesaprev.RData")
-save(kplusrece, file = "receitaprev.RData")
+save(serie.ativos, file = "receitaprev.RData")
 
 load("despesaprev.RData")
 load("receitaprev.RData")
@@ -57,4 +58,4 @@ load("receitaprev.RData")
 setwd("C:/Users/mrrezende/Documents/")
 
 fwrite(kplusdesp, file = "despesaprevisao.txt", sep = ";")
-fwrite(kplusrece, file = "receitaprevisao.txt", sep = ";")
+fwrite(serie.ativos, file = "receitaprevisao.txt", sep = ";")
