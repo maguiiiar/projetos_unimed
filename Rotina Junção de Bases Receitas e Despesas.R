@@ -168,7 +168,7 @@ despesas_dyad <- despesas_dyad %>% filter(!chave == "#")
 
 ### TRATANDO COLUNA DO CARTÃO PARA MAIS UMA COLUNA CONSISTENTE
 
-despesas_dyad <- despesas_dyad %>% filter(nchar(NumeroCartao) <= 15)
+despesas_dyad$NumeroCartao <- substr(despesas_dyad$NumeroCartao,3,17)
 
 ### INCLUSÃO DE CHAVES PARA ENCONTRAR OS CODIGOS DE BENEFICIARIO NO CARDIO
 
@@ -217,6 +217,7 @@ despesas_cardio_final <- left_join(despesas, despesas_union,
 
 despesas_cardio_final <- despesas_cardio_final %>% filter(!is.na(
                                               `Beneficiario Codigo`)) %>%
+                                                ungroup() %>%
                                                 select(-IdPessoa)
 
 ### REORGANIZANDO AS COLUNAS PARA FAZER A JUNÇÃO | MUDA NOMES DE COLUNAS
