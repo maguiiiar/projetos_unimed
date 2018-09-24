@@ -5,11 +5,13 @@ require(stringr)
 
 custo <- fread("20180827001_custo_01.01.2017 à 31.07.2018 por Item e Grupo de Consumo todos hospitais.txt", sep = ";", dec = ",")
 drg <- fread("DRG 01.01.2017 a 31.07.2018.txt", sep = "\t", dec  =",")
-drg <- drg %>% select(`Identificador do Paciente`, `Permanência Real`, `Permanência Prevista na Alta`)
+drg <- drg %>% select(`Identificador do Paciente`, `Permanência Real`, `Permanência Prevista na Alta`, `Nome do Hospital`, )
 drg$`Permanência Real` = as.numeric(drg$`Permanência Real`)
 drg$`Permanência Prevista na Alta` = as.numeric(drg$`Permanência Prevista na Alta`)
+drg$`Identificador do Paciente` <- as.character(drg$`Identificador do Paciente`)
 names(custo)[1] <- "Identificador do Paciente"
-custo <- left_join(custo, drg, by = "Identificador do Paciente")
+
+drg.com.custo <- left_join(custo, drg, by = "Identificador do Paciente")
 
 # custo$`Valor Total do Item + 1` = custo$`Valor Total do Item` + 1
 
@@ -67,10 +69,11 @@ itens = custo %>% filter(`Codigo do DRG Brasil` %in% c(153, 195, 203, 305, 384, 
                   group_by(`Hospital`, `Codigo do DRG Brasil`, `Descricao do DRG Brasil`, `Codigo do Item`, `Descricao do Item`) %>% 
                   summarise(Quantidade = sum(`Quantidade do Item`, na.rm = TRUE),
                             `Valor Total` = sum(`Valor Total do Item`, na.rm = TRUE),
-                            `Valor do Item` = `Valor Total`/Quantidade)
+                            `Valor Médio do Item` = `Valor Total`/Quantidade)
 
 custo.excesso = custo %>% group_by(`Identificador do Paciente`) %>% summarise(`Custo Total` = sum(`Valor Total do Item`, na.rm = TRUE))
-drg.com.custo = left_join(drg, custo.excesso, by="Identificador do Paciente")
+drg.com.custo = left_join(drg, custo.excesso)
+drg.com.custo = drg.com.custo %>% filter((`Permanência Prevista na Alta` - `Permanência Real`) < 0)
 
 hospitais = drg.com.custo %>% filter(!is.na(`Custo Total`)) %>% 
                               group_by(`Nome do Hospital`) %>% 
