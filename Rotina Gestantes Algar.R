@@ -56,7 +56,8 @@ base.utilizacao.gest$`Valor Custo` <- str_replace_all(
 
 ### TRANSFORMANDO EM NUMERICA
 
-base.utilizacao.gest$`Valor Custo` <- as.numeric(base.utilizacao.gest$`Valor Custo`)
+base.utilizacao.gest$`Valor Custo` <- as.numeric(
+  base.utilizacao.gest$`Valor Custo`)
 
 ### VERIFICANDO VALORES
 
@@ -67,3 +68,28 @@ sum(base.utilizacao.gest$`Valor Custo`)
 
 write.csv(base.utilizacao.gest,
           file = "Resumo Gestantes Algar v2.csv", row.names = FALSE)
+
+
+######################## proximo teste
+
+setwd("C:/Users/mrrezende/Documents/")
+
+base.custo <- fread("C:/Users/mrrezende/Documents/Algar.txt", 
+                    colClasses = c("%NumeroCartao" = "character", 
+                                   "?Beneficiario Codigo" = "character"))
+
+base.cronicos <- fread("C:/Users/mrrezende/Documents/cron.txt",
+                       colClasses = c("Numero Cartão" = "character"))
+
+base.cronicos <- rename(base.cronicos,"%NumeroCartao" = "Numero Cartão")
+
+base.cronicos2 <- base.cronicos %>% filter(
+  `Crônico?` == "Crônico") %>% select(`%NumeroCartao`)
+
+procedimentos.cronicos <- inner_join(base.custo, base.cronicos2, 
+                                     by = "%NumeroCartao")
+
+procedimentos.cronicos <- procedimentos.cronicos %>% distinct()
+
+fwrite(procedimentos.cronicos, file = "Proc. Cronicos.csv", 
+          row.names = F,sep = "|")
