@@ -5,7 +5,7 @@ require(caret)
 require(data.table)
 
 ativos <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
-                Base Benef Ativos/ativos_201805.tab",
+                Base Benef Ativos/ativos_201808.tab",
                 colClasses = c(`Beneficiario Codigo` = "character"), 
                 encoding = "UTF-8")
 

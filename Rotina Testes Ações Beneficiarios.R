@@ -10,9 +10,7 @@ baserecursos <-fread("C:/Users/mrrezende/Documents/Base RP.csv",sep = ",",
 basesn <- fread("C:/Users/mrrezende/Documents/BaseAcao.csv", sep = ",",
                 colClasses = c(`?Beneficiario Codigo` = "character"))
 
-basesn <- basesn %>% select(-`Geom. mean(P(Internação=Sim))`,
-                            -`Geom. mean(P(Internação=Não))`,
-                            -`Geom. mean(P(Internação=Sim)+1)`,
+basesn <- basesn %>% select(-`Geom. mean(P(Internação=Sim)+1)`,
                             -`Geom. mean(P(Internação=Não)+1)`)
 
 colnames(baserecursos)[1] <- "Beneficiario Codigo"

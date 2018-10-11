@@ -432,6 +432,18 @@ receitas.cardio$chave <- paste0(substr(
   receitas.cardio$NomeBeneficiario,1,13),"#",
   receitas.cardio$Beneficiario.DtNascimento)
 
+### MUDANDO DIRETORIO PARA SALVAR BASE EM .RDATA
+
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases R/")
+
+### SALVANDO ARQUIVO FINALIZADO
+
+save(receitas.cardio, file = "receitas.cardio.FINAL.RData")
+
+### CARREGANDO BASE JÁ PRONTA
+
+load(file = "receitas.cardio.FINAL.RData")
+
 ### MUDANÇA DE DIRETÓRIO PARA BUSCAR VALORES DO DYAD
 
 setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
