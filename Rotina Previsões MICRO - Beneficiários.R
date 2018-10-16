@@ -59,3 +59,8 @@ setwd("C:/Users/mrrezende/Documents/")
 
 fwrite(kplusdesp, file = "despesaprevisao.txt", sep = ";")
 fwrite(serie.ativos, file = "receitaprevisao.txt", sep = ";")
+
+
+############## previsao com monte carlo ###########
+
+tseries <- ts(serie.ativos$valor, frequency = 12, start = c(2015,1))
