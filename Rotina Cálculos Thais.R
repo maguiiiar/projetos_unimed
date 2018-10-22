@@ -110,3 +110,57 @@ benefs <- bind_rows(benef1,benef2,benef3,benef4,
                     benef5,benef6,benef7,benef8,benef9)
 
 fwrite(benefs, file = "Custo.benef3.csv", sep = "|")
+
+
+
+
+
+
+################ BASE NOVA PARA JOIN ##################
+
+benef_codigos <- fread("C:/Users/mrrezende/Documents/CodigosThais.txt",
+                colClasses = c("Beneficiario Codigo" = "character"))
+
+## rodar base final do script "JUNCAO DE BASES RECEITAS E DESPESAS"
+
+teste <- inner_join(despesas.final, benef_codigos)
+
+
+### MUDANDO DIRETÓRIO PARA DESPESAS DO CARDIO
+
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Despesas GERAL/")
+
+### BUSCANDO ARQUIVOS, SELECIONANDO COLUNAS, UNINDO ARQUIVOS E AGRUPANDO
+
+despesas <- list.files(pattern = "*.txt") %>% 
+  lapply(fread,colClasses = c(`IdPessoa`="character", 
+                              `CodBeneficiario`="character",
+                              `Competencia` = "character",
+                              `Cnp` = "character",
+                              `FctEvento.QtdUtilizacaoAjustado`="numeric",
+                              `FctCusto.VlrTotalAjustado` = "numeric",
+                              `CodExecutante` = "numeric"),
+         stringsAsFactors=F, encoding="UTF-8", sep = "|",
+         select=c("Competencia","IdBeneficiario",
+                  "CodExecutante","NomeExecutante",
+                  "EspecPrincipalPrestador","Evento.DtAbEvento",
+                  "Evento.HrAbEvento","CodSolicitante","NomeSolicitante",
+                  "EspecPrincipalSolicitante",
+                  "FctEvento.QtdUtilizacaoAjustado",
+                  "FctCusto.VlrTotalAjustado",
+                  "CodBeneficiario","NomeBeneficiario","Sexo","Cnp",
+                  "IdPessoa","DtNascimento","Idade","TipoEmpresa",
+                  "GrupoEmpresa","ClasseServico_Dyad", 
+                  "SubClasseServico_Dyad"))  %>% bind_rows #%>%
+  # group_by(Competencia,CodBeneficiario,Cnp,
+  #          NomeBeneficiario,IdPessoa,
+  #          DtNascimento,TipoEmpresa) %>% 
+  # summarise(qtde_util = sum(
+  #   FctEvento.QtdUtilizacaoAjustado),
+  #   valor = sum(FctCusto.VlrTotalAjustado))
+
+
+### CRIANDO CHAVE COM NOME E DATA DE NASCIMENTO
+
+despesas$chave <- paste0(substr(despesas$NomeBeneficiario,1,13),"#",
+                         despesas$DtNascimento)

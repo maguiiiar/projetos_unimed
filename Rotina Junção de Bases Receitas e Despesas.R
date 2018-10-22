@@ -26,7 +26,8 @@ despesas <- list.files(pattern = "*.txt") %>%
                   "FctCusto.VlrTotalAjustado",
                   "CodBeneficiario","NomeBeneficiario","Cnp",
                   "IdPessoa","DtNascimento","TipoEmpresa",
-                  "GrupoEmpresa"))  %>% bind_rows %>%
+                  "GrupoEmpresa","NomeExecutante",
+                  "NomeSolicitante"))  %>% bind_rows %>%
                             group_by(Competencia,CodBeneficiario,Cnp,
                                      NomeBeneficiario,IdPessoa,
                                      DtNascimento,TipoEmpresa) %>% 
