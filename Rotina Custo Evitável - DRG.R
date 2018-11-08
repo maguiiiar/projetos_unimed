@@ -2,10 +2,11 @@ require(data.table)
 require(dplyr)
 require(psych)
 require(stringr)
+require(tidyr)
 
 custo <- fread("20180827001_custo_01.01.2017 à 31.07.2018 por Item e Grupo de Consumo todos hospitais.txt", sep = ";", dec = ",")
 drg <- fread("DRG 01.01.2017 a 31.07.2018.txt", sep = "\t", dec  =",")
-drg <- drg %>% select(`Identificador do Paciente`, `Permanência Real`, `Permanência Prevista na Alta`, `Nome do Hospital`, )
+drg <- drg %>% select(`Identificador do Paciente`, `Permanência Real`, `Permanência Prevista na Alta`, `Nome do Hospital`)
 drg$`Permanência Real` = as.numeric(drg$`Permanência Real`)
 drg$`Permanência Prevista na Alta` = as.numeric(drg$`Permanência Prevista na Alta`)
 drg$`Identificador do Paciente` <- as.character(drg$`Identificador do Paciente`)
@@ -99,3 +100,17 @@ write.csv(teste3, file = "(Pacotes) Hospitais por Grupo DRG - Geométrica - Hosp
 write.csv(drg.view, file = "(Pacotes) Hospitais por Grupo DRG - Permanência.csv")
 write.csv(view, file = "TESTE.csv")
 write.csv(hospitais, file = "Análise Deflator Diária.csv", row.names = FALSE)
+
+
+
+################## DRG ATUALIZAÇÕES ###############
+
+custo.uti <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases DRG/Custo_CTI.csv", sep =";", dec = ",")
+
+custo.cirurgico <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases DRG/Custo_Unimed_Uberlandia_Cirurgico.csv", sep =";", dec = ",")
+
+custo.clinico <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Bases DRG/Custo_Unimed_Uberlandia_Clinico.csv", sep =";", dec = ",")
+
+uti.merge <- custo.uti %>% spread(`Total Custo`)
+
+uti.merge <- custo.uti %>% group_by(id_registro_paciente) %>% summarise(sum(`Total Custo`))
