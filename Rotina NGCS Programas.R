@@ -11,6 +11,8 @@ BaseFim <- fread("C:/Users/mrrezende/Documents/
                  colClasses = c("CPF" = "character", 
                                 "Cód. Beneficiário" = "character"))
 
+BaseFim %>% group_by(Programa) %>% summarise(n_distinct(CPF))
+
 ### PROGRAMA DORES PERSISTENTES
 
 dores.pers <- BaseFim %>% filter(Programa == "Dores Persistentes")
@@ -28,7 +30,7 @@ prog.dores <- dores.pers %>% mutate(`Quantidade PS` = replace(
                                        Valor = sum(`VALOR PROCEDIMENTO`))
 
 por.membro.por.mes.dores <- prog.dores %>% group_by(
-  CompPagamento) %>% summarise(pmpm = sum(Valor)/97)
+  CompPagamento) %>% summarise(pmpm = sum(Valor)/95)
 
 hist(por.membro.por.mes.dores$pmpm)
 
@@ -47,7 +49,7 @@ prog.idoso <- idoso.bem.cuidado %>% mutate(`Quantidade PS` = replace(
   summarise(Qtde = sum(QUANTIDADE),Valor = sum(`VALOR PROCEDIMENTO`))
 
 por.membro.por.mes.idoso <- prog.idoso %>% group_by(
-  CompPagamento) %>% summarise(pmpm = sum(Valor)/71)
+  CompPagamento) %>% summarise(pmpm = sum(Valor)/70)
 
 hist(por.membro.por.mes.idoso$pmpm)
 
@@ -84,7 +86,7 @@ prog.leve <- viva.leve %>% mutate(`Quantidade PS` = replace(
   summarise(Qtde = sum(QUANTIDADE),Valor = sum(`VALOR PROCEDIMENTO`))
 
 por.membro.por.mes.leve <- prog.leve %>% group_by(
-    CompPagamento) %>% summarise(pmpm = sum(Valor)/144)
+    CompPagamento) %>% summarise(pmpm = sum(Valor)/141)
 
 hist(por.membro.por.mes.leve$pmpm)
 
