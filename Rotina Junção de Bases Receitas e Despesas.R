@@ -17,7 +17,7 @@ despesas <- list.files(pattern = "*.txt") %>%
                               `CodBeneficiario`="character",
                               `Competencia` = "character",
                               `Cnp` = "character",
-                              `FctEvento.QtdUtilizacaoAjustado`="numeric",
+                            `FctEvento.QtdUtilizacaoAjustado`="numeric",
                               `FctCusto.VlrTotalAjustado` = "numeric"),
          stringsAsFactors=F, encoding="UTF-8", sep = "|",
          select=c("Competencia","Evento.DtAbEvento",
@@ -85,8 +85,8 @@ despesas.dyad <- list.files(pattern = "*.txt") %>%
                          `Competencia`="character",
                          `Beneficiario CNP` = "character",
                          `%NumeroCartao` = "character",
-                  `Guia.ProcedimentoQuantAutorizadaAjustado` ="character",
-                        `Guia.ProcedimentoVlrPagoAjustado` = "character"),
+                 `Guia.ProcedimentoQuantAutorizadaAjustado` ="character",
+                       `Guia.ProcedimentoVlrPagoAjustado` = "character"),
          na.strings=c("","NA")) %>% bind_rows()
 
 ### TRANSFORMANDO COLUNAS EM NÚMERO
@@ -171,7 +171,7 @@ despesas_dyad <- despesas_dyad %>% filter(!chave == "#")
 
 despesas_dyad$NumeroCartao <- substr(despesas_dyad$NumeroCartao,3,17)
 
-### INCLUSÃO DE CHAVES PARA ENCONTRAR OS CODIGOS DE BENEFICIARIO NO CARDIO
+### INCLUSÃO DE CHAVES PARA ENCONTRAR OS COD DE BENEFICIARIO NO CARDIO
 
 despesas_union <- left_join(despesas_cardio,despesas_dyad[,c(1,3)], 
                          by = "NumeroCartao")
@@ -363,7 +363,7 @@ receitas_adc_cardio$ComplementoAdicionais.DescontoReembolso<- as.numeric(
 receitas_adc_cardio <- receitas_adc_cardio %>% group_by(Competencia,
                                                       IdBeneficiario) %>% 
                               summarise(total_complem_adic = round(sum(
-                    ComplementoAdicionais.DescontoReembolso,na.rm = T),4))
+                   ComplementoAdicionais.DescontoReembolso,na.rm = T),4))
 
 ### RODANDO NOVAMENTE A BASE DE BENEFICIARIOS PARA VINCULAR AOS VALORES
 
@@ -373,7 +373,7 @@ dados_receitas_benef <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
                               encoding = "UTF-8",
                               colClasses = c(`CNP` = "character",
                                          `IdBeneficiario` = "character",
-                                         `CodBeneficiario` = "character"))
+                                       `CodBeneficiario` = "character"))
 
 ### INCLUINDO OS VALORES POR BENEFICIÁRIO
 
@@ -386,7 +386,7 @@ receitas.adc <- receitas.adc %>% select(-AutoNumber_Beneficiario,
                                         -NomeContrato,-NumeroEmpresa,
                                         -CodFamilia,-CodContrato,
                                         -NumeroContrato) %>% filter(
-        TipoEmpresa %in% c("Pré Pagamento", "Colaborador")) %>% distinct()
+       TipoEmpresa %in% c("Pré Pagamento", "Colaborador")) %>% distinct()
 
 receitas.adc <- receitas.adc %>% filter(!Competencia %in% c("201705",
                                                             "201706",
@@ -422,7 +422,7 @@ receitas.cardio <- receitas.cardio %>% mutate(
   total_complem_adic = ifelse(is.na(total_complem_adic),0,
                               total_complem_adic)) %>% mutate(
                                 receita = ifelse(is.na(receita),0,
-                                          receita)) %>% group_by_all() %>%
+                                        receita)) %>% group_by_all() %>%
   summarise(Vlr.Receita = sum(receita) + sum(total_complem_adic)) %>% 
    ungroup %>% select(-total_complem_adic,-receita,-Sexo,-IdBeneficiario,
                       -GrupoEmpresa,-Idade)
@@ -447,8 +447,7 @@ load(file = "receitas.cardio.FINAL.RData")
 
 ### MUDANÇA DE DIRETÓRIO PARA BUSCAR VALORES DO DYAD
 
-setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/
-      Receitas_Dyad/")
+setwd("C:/ProjetosUnimed/Arquivos (.txt, .csv)/Base Receitas GERAL/Receitas_Dyad/")
 
 ### LENDO BASE DO DYAD
 
@@ -456,7 +455,7 @@ receita.dyad <- list.files(pattern = "*.txt") %>%
   lapply(fread,colClasses = c(`Competencia` = "character",
                               `Beneficiario Codigo` = "character"),
          stringsAsFactors=F, encoding="UTF-8", sep = "|",
-         select=c("Receita.PedidoVlrLiquido","Competencia","NumeroCartao",
+       select=c("Receita.PedidoVlrLiquido","Competencia","NumeroCartao",
                   "Beneficiario Codigo","Beneficiario Nome",
                   "Beneficiario CNP","Beneficiario Data Nascimento",
                 "Beneficiario Sexo","Beneficiario Idade",
@@ -475,7 +474,7 @@ receita.dyad$Receita.PedidoVlrLiquido<- as.numeric(
 
 receitas.dyad <- receita.dyad %>% group_by_all() %>% summarise(
                        Valor = sum(Receita.PedidoVlrLiquido)) %>%
-filter(`Contrato Tipo Empresa` %in% c("Pré Pagamento", "Colaborador")) %>%
+filter(`Contrato Tipo Empresa` %in% c("Pré Pagamento","Colaborador")) %>%
   filter(!is.na(`Beneficiario Idade`)) %>% distinct()
 
 receitas.dyad <- receitas.dyad %>% ungroup() %>% select(
@@ -530,7 +529,7 @@ receitas.dyad.selec <- receitas.dyad.selec %>% filter(!chave == "#")
 receitas.dyad.selec$NumeroCartao <- substr(
   receitas.dyad.selec$NumeroCartao,3,17)
 
-### INCLUSÃO DE CHAVES PARA ENCONTRAR OS CODIGOS DE BENEFICIARIO NO CARDIO
+### INCLUSÃO DE CHAVES PARA ENCONTRAR OS COD DE BENEFICIARIO NO CARDIO
 
 receitas_union <- left_join(receitas.cardio.selec,
                             receitas.dyad.selec[,c(1,3)],
