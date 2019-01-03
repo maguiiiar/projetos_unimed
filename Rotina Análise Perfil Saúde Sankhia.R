@@ -7,7 +7,8 @@ require(ggplot2)
 
 analise.perfil <- fread(file = "C:/ProjetosUnimed/Arquivos (.txt, .csv)/
                         Base Perfil Saúde/Descritiva - Sankhia.txt",
-                        na.strings = "")
+                        na.strings = "",
+                        colClasses = c("Codigo" = "character"))
 
 perfil.sankhia <- analise.perfil %>% filter(`Plano atual` != 
                                               "Não possui") %>%
@@ -40,6 +41,8 @@ perfil.sankhia$faixa.etaria <-if_else(perfil.sankhia$Idade < 19,"00 a 18",
 
 perfil.sankhia <- perfil.sankhia %>% select(
   -Carteira,-Empresa,-Nome) %>% distinct()
+
+#### DESCRITIVA ####
 
 sexo.imc <- table(perfil.sankhia$Sexo,perfil.sankhia$inside.imc)
 
@@ -194,3 +197,9 @@ ggplot(data=data)+
   theme(plot.title = element_text(color="black",size=14,
                               face="bold.italic",hjust = 0.5),
         legend.title = element_blank())
+
+names(perfil.sankhia)[names(
+  perfil.sankhia) == "Codigo"] <- "Beneficiario Codigo"
+
+teste <- inner_join(despesas.dyad, perfil.sankhia, 
+                    by = "Beneficiario Codigo")
