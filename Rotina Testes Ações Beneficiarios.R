@@ -4,10 +4,12 @@ require(caret)
 
 setwd("C:/Users/mrrezende/Documents/bases/")
 
-baserecursos <-fread("C:/Users/mrrezende/Documents/bases/Base RP.csv",sep = ",",
+baserecursos <-fread("C:/Users/mrrezende/Documents/bases/Base RP.csv",
+                     sep = ",",
                     colClasses = c(`?Beneficiario Codigo` = "character"))
 
-basesn <- fread("C:/Users/mrrezende/Documents/bases/BaseAcao.csv", sep = ",",
+basesn <- fread("C:/Users/mrrezende/Documents/bases/BaseAcao.csv", 
+                sep = ",",
                 colClasses = c(`?Beneficiario Codigo` = "character"))
 
 basesn <- basesn %>% select(-`Geom. mean(P(Internação=Sim)+1)`,
