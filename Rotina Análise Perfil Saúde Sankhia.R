@@ -201,5 +201,25 @@ ggplot(data=data)+
 names(perfil.sankhia)[names(
   perfil.sankhia) == "Codigo"] <- "Beneficiario Codigo"
 
-teste <- inner_join(despesas.dyad, perfil.sankhia, 
+custo.sankhia <- inner_join(despesas.dyad, perfil.sankhia, 
                     by = "Beneficiario Codigo")
+
+custo.p.benef.sank <- custo.sankhia %>% group_by(
+  `Beneficiario Codigo`) %>% summarise(
+    Valor = sum(Guia.ProcedimentoVlrPagoAjustado))
+
+mensal.sankhia <- custo.sankhia %>% group_by(Competencia) %>% summarise(
+  Custo = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+prob.internacao <- fread("C:/Users/mrrezende/Documents/
+                         Prob. Internacao.csv",
+                         na.strings = "",
+                         colClasses = c(
+                           "Beneficiario Codigo" = "character"))
+
+prob.inter.sankhia <- inner_join(custo.p.benef.sank,prob.internacao,
+                                 by = "Beneficiario Codigo")
+
+fwrite(prob.inter.sankhia, 
+       file = "C:/Users/mrrezende/Documents/Sankhia - Probabilidades.csv",
+       sep = "|")
