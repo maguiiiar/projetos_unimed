@@ -20,7 +20,13 @@ colnames(basesn)[1] <- "Beneficiario Codigo"
 
 tomadadecisao <- anti_join(basesn,baserecursos, 
                            by = "Beneficiario Codigo")
-### QUEM DEVE SER ACIONADO ###
+
+
+setwd("C:/Users/mrrezende/Documents/")
+
+fwrite(tomadadecisao, file = "BaseTomadaDeDecisao.txt", sep = ";")
+
+### QUEM DEVE SER ACIONADO #####
 # 
 # tomadadecisao2 <- semi_join(basesn,baserecursos,
 #                             by = "Beneficiario Codigo")
@@ -37,9 +43,6 @@ tomadadecisao <- anti_join(basesn,baserecursos,
 # 
 # jaatendidos$prop <- jaatendidos$qtde_benef/jaatendidos$contador
 
-setwd("C:/Users/mrrezende/Documents/")
-
-fwrite(tomadadecisao, file = "BaseTomadaDeDecisao.txt", sep = ";")
 
 ################################ TESTE BASES ####################
 
