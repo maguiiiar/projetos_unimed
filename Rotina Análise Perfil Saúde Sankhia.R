@@ -198,6 +198,8 @@ ggplot(data=data)+
                               face="bold.italic",hjust = 0.5),
         legend.title = element_blank())
 
+######## sankhia ######
+
 names(perfil.sankhia)[names(
   perfil.sankhia) == "Codigo"] <- "Beneficiario Codigo"
 
@@ -222,4 +224,35 @@ prob.inter.sankhia <- inner_join(custo.p.benef.sank,prob.internacao,
 
 fwrite(prob.inter.sankhia, 
        file = "C:/Users/mrrezende/Documents/Sankhia - Probabilidades.csv",
+       sep = "|")
+
+######## colaboradores ######
+
+colaboradores <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
+                       Base Perfil Saúde/Colaboradores.txt")
+
+names(colaboradores)[names(
+  colaboradores) == "CPF"] <- "Beneficiario CNP"
+
+custo.colab <- inner_join(despesas.dyad, colaboradores, 
+                            by = "Beneficiario CNP")
+
+custo.p.benef.colab <- custo.colab %>% group_by(
+  `Beneficiario Codigo`) %>% summarise(
+    Valor = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+mensal.colab <- custo.colab %>% group_by(Competencia) %>% summarise(
+  Custo = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+prob.internacao <- fread("C:/Users/mrrezende/Documents/
+                         Prob. Internacao.csv",
+                         na.strings = "",
+                         colClasses = c(
+                           "Beneficiario Codigo" = "character"))
+
+prob.inter.colab <- inner_join(custo.p.benef.colab,prob.internacao,
+                                 by = "Beneficiario Codigo")
+
+fwrite(prob.inter.colab, 
+       file = "C:/Users/mrrezende/Documents/Colab - Probabilidades.csv",
        sep = "|")
