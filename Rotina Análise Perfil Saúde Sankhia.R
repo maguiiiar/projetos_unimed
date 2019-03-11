@@ -197,7 +197,6 @@ ggplot(data=data)+
   theme(plot.title = element_text(color="black",size=14,
                               face="bold.italic",hjust = 0.5),
         legend.title = element_blank())
-
 ######## sankhia ######
 
 names(perfil.sankhia)[names(
@@ -225,6 +224,7 @@ prob.inter.sankhia <- inner_join(custo.p.benef.sank,prob.internacao,
 fwrite(prob.inter.sankhia, 
        file = "C:/Users/mrrezende/Documents/Sankhia - Probabilidades.csv",
        sep = "|")
+
 
 ######## colaboradores ######
 
@@ -256,3 +256,64 @@ prob.inter.colab <- inner_join(custo.p.benef.colab,prob.internacao,
 fwrite(prob.inter.colab, 
        file = "C:/Users/mrrezende/Documents/Colab - Probabilidades.csv",
        sep = "|")
+
+########## algar ###########
+
+algar <- fread("C:/Users/mrrezende/Documents/bases/algar_from_thais.txt",
+               colClasses = c(
+                 "Codigo" = "character"))
+
+names(algar)[names(algar) == "Codigo"] <- "Beneficiario Codigo"
+
+names(algar)[names(algar) == "Carteira"] <- "Código do Paciente"
+
+algar$`Código do Paciente` <- NULL
+algar$Nome <- NULL
+
+custo.algar <- inner_join(despesas.dyad, algar, 
+                          by = "Beneficiario Codigo")
+
+custo.p.benef.algar <- custo.algar %>% group_by(
+  `Beneficiario Codigo`) %>% summarise(
+    Valor = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+prob.algar <- inner_join(prob.internacao, algar,
+                          by = "Beneficiario Codigo")
+
+prob.algar2 <- inner_join(custo.p.benef.algar,prob.internacao, 
+                         by = "Beneficiario Codigo")
+
+teste <- anti_join(prob.algar,prob.algar2)
+
+prob.algar.final <- bind_rows(prob.algar2,teste)
+
+fwrite(prob.algar.final, 
+       file = "C:/Users/mrrezende/Documents/Algar - Probabilidades.csv",
+       sep = "|", dec = ",")
+
+internacoes <- fread("C:/Users/mrrezende/Documents/internacoes.txt",
+                     colClasses = c("Código do Paciente" = "character"))
+
+internacoes.algar <- inner_join(algar,internacoes, 
+                                by = "Código do Paciente")
+
+fwrite(internacoes.algar,
+       file = "C:/Users/mrrezende/Documents/Internacoes - Algar.csv",
+       sep = "|", dec = ",")
+
+falta.cartao <- fread("C:/Users/mrrezende/Documents/cartao.falta.txt",
+                      colClasses = c("Beneficiario Codigo" = "character"))
+
+busca.cartao <- inner_join(falta.cartao,despesas.dyad)
+
+cartoes <- busca.cartao %>% select(`%NumeroCartao`) %>% distinct(.)
+
+names(cartoes)[names(cartoes) == "%NumeroCartao"] <- "Código do Paciente"
+
+faltantes <- inner_join(internacoes, cartoes,
+                        by = "Código do Paciente")
+
+fwrite(faltantes,
+       file = "C:/Users/mrrezende/Documents/faltantes.csv",
+       sep = ";", dec = ",")
+

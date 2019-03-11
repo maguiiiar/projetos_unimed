@@ -32,8 +32,9 @@ despesas <- list.files(pattern = "*.txt") %>%
                                      NomeBeneficiario,IdPessoa,
                                      DtNascimento,TipoEmpresa) %>% 
                             summarise(qtde_util = sum(
-                              FctEvento.QtdUtilizacaoAjustado),
-                              valor = sum(FctCusto.VlrTotalAjustado))
+                              FctEvento.QtdUtilizacaoAjustado, na.rm = T),
+                              valor = sum(FctCusto.VlrTotalAjustado, 
+                                          na.rm = T))
 
 ### CRIANDO CHAVE COM NOME E DATA DE NASCIMENTO
 
@@ -103,7 +104,8 @@ despesas.dyad.group <- despesas.dyad %>%
   group_by(Competencia,`Beneficiario Nome`,`Beneficiario CNP`,
            `Beneficiario Codigo`,`%NumeroCartao`,
            `Beneficiario Data Nascimento`,`Contrato Tipo Empresa`) %>%
-  summarise(qtde_util = sum(Guia.ProcedimentoQuantAutorizadaAjustado),
+  summarise(qtde_util = sum(Guia.ProcedimentoQuantAutorizadaAjustado,
+                            na.rm = T),
     valor = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
 
 ### COLOCANDO O NOME DO BENEFICIÁRIO EM MAIÚSCULO

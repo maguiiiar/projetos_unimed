@@ -25,6 +25,9 @@ setanov17uni <- despesas.final %>% filter(`Beneficiario Codigo` %in% c(
   "01243005","01125658","011258275","01125612","01125881")) %>% group_by(
     Competencia) %>% summarise(Total = sum(valor))
 
+fwrite(setanov17uni, file = "C:/Users/mrrezende/Documents/mais_cias.txt",
+       sep = "|", dec = ",")
+
 jan18uni <- despesas.final %>% filter(`Beneficiario Codigo` %in% c(
   "01125816","01125831")) %>% group_by(
     Competencia) %>% summarise(Total = sum(valor))
@@ -44,6 +47,9 @@ benef.cias <- fread("C:/Users/mrrezende/Documents/benef_cias.txt",
 dez16colab<- inner_join(despesas.final,benef.cias,
                         by = "Beneficiario Codigo") %>% group_by(
                           Competencia) %>% summarise(Total = sum(valor))
+
+fwrite(dez16colab, file = "C:/Users/mrrezende/Documents/colab_cias.txt",
+       sep = "|", dec = ",")
 
 algar.cias <- fread("C:/Users/mrrezende/Documents/algar_cias.txt",
                     colClasses = c("Beneficiario Codigo" = "character"))
