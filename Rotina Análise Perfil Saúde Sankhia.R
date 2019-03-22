@@ -235,7 +235,7 @@ names(colaboradores)[names(
   colaboradores) == "CPF"] <- "Beneficiario CNP"
 
 custo.colab <- inner_join(despesas.dyad, colaboradores, 
-                            by = "Beneficiario CNP")
+                            by = "Beneficiario Codigo")
 
 custo.p.benef.colab <- custo.colab %>% group_by(
   `Beneficiario Codigo`) %>% summarise(
