@@ -231,10 +231,13 @@ fwrite(prob.inter.sankhia,
 colaboradores <- fread("C:/ProjetosUnimed/Arquivos (.txt, .csv)/
                        Base Perfil Saúde/Colaboradores.txt")
 
+colab2 <- fread("C:/Users/mrrezende/Documents/Codigo_Colab.txt",
+                colClasses = c("Beneficiario Codigo" = "character"))
+
 names(colaboradores)[names(
   colaboradores) == "CPF"] <- "Beneficiario CNP"
 
-custo.colab <- inner_join(despesas.dyad, colaboradores, 
+custo.colab <- inner_join(despesas.dyad, colab2, 
                             by = "Beneficiario Codigo")
 
 custo.p.benef.colab <- custo.colab %>% group_by(
@@ -253,9 +256,92 @@ prob.internacao <- fread("C:/Users/mrrezende/Documents/
 prob.inter.colab <- inner_join(custo.p.benef.colab,prob.internacao,
                                  by = "Beneficiario Codigo")
 
+test.colab <- fread("C:/Users/mrrezende/Documents/teste_colab.txt",
+                    colClasses = c("Beneficiario Codigo" = "character"))
+
+teste <- left_join(prob.inter.colab, test.colab,
+                   by = "Beneficiario Codigo")
+
+fwrite(teste, file = "C:/Users/mrrezende/Documents/Benef_Perfil.csv",
+       sep = "|",dec = ",")
+
 fwrite(prob.inter.colab, 
        file = "C:/Users/mrrezende/Documents/Colab - Probabilidades.csv",
        sep = "|")
+
+### correlacao colaboradores##
+
+require(corrplot)
+
+testes <- fread("C:/Users/mrrezende/Documents/teste.txt")
+
+correl <- cor(testes$`P(Internação=Sim)`,testes$`Valor Gasto`,
+              method = "spearman")
+
+matriz <- testes %>% select(Idade,`Qtde PS`,`Qtde Espec`,
+                            `Valor Gasto`,`P(Internação=Sim)`)
+
+disper <- cor(matriz, method = "spearman")
+
+corrplot(disper, diag = F, type = "upper",tl.srt=45)
+
+########## eletrosom #########
+
+eletrosom <- fread("C:/Users/mrrezende/Documents/codigos_eletrosom.txt",
+                   colClasses = c("Beneficiario Codigo" = "character"))
+
+custo.eletrosom <- inner_join(despesas.dyad, eletrosom, 
+                          by = "Beneficiario Codigo")
+
+custo.p.benef.eletrosom <- custo.eletrosom %>% group_by(
+  `Beneficiario Codigo`) %>% summarise(
+    Valor = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+mensal.eletrosom <- custo.eletrosom %>% group_by(
+  Competencia) %>% summarise(
+  Custo = sum(Guia.ProcedimentoVlrPagoAjustado, na.rm = T))
+
+prob.internacao <- fread("C:/Users/mrrezende/Documents/
+                         Prob. Internacao.csv",
+                         na.strings = "",
+                         colClasses = c(
+                           "Beneficiario Codigo" = "character"))
+
+prob.inter.eletrosom <- inner_join(custo.p.benef.eletrosom,
+                                   prob.internacao,
+                               by = "Beneficiario Codigo")
+
+perfil_eletrosom <- fread(
+  "C:/Users/mrrezende/Documents/codigos_eletrosom_detalhados.txt",
+                    colClasses = c("Beneficiario Codigo" = "character"))
+
+juncao_perfil_prob <- left_join(prob.inter.eletrosom, perfil_eletrosom,
+                   by = "Beneficiario Codigo")
+
+fwrite(juncao_perfil_prob, 
+       file = "C:/Users/mrrezende/Documents/Benef_Perfil_Prob_elet.csv",
+       sep = "|",dec = ",")
+
+fwrite(prob.inter.eletrosom, 
+       file = "C:/Users/mrrezende/Documents/Eletros - Probabilidades.csv",
+       sep = "|")
+
+### correlacao eletrosom##
+
+require(corrplot)
+
+prob_ele <- fread("C:/Users/mrrezende/Documents/custoeprob_eletrosom.txt",
+                  dec = ",")
+
+correl <- cor(prob_ele$`P(Internação=Sim)`,prob_ele$`Valor`,
+              method = "spearman")
+
+matriz <- prob_ele %>% select(Idade,`Qtde PS`,`Qtde Espec`,
+                            `Valor`,`P(Internação=Sim)`)
+
+disper <- cor(matriz, method = "spearman")
+
+corrplot(disper, diag = F, type = "upper",tl.srt=45)
 
 ########## algar ###########
 
